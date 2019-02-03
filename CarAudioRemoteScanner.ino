@@ -2,22 +2,25 @@
 #include <HardwareSerial.h>
 #include <Wire.h>
 #include "config.h"
-#include "send_command.h"
 
-uint16_t currentOutput = 0;
+#define KINDA_EQUAL(A, B) ((A-B) < INPUT_SWAY || (B-A) < INPUT_SWAY)
+
 bool autoIncrement = false;
+uint16_t currentOutput = 0;
 uint16_t incrementStep = 1;
+uint16_t cmdDuration = CMD_DURATION;
 
 const char* helpString = R"(
 Use one of the following:
-  h - get help
   a - read analog input
   i - autoincrement output on / off
-  p - print current output value and step increment
+  p - print current state
   t - send tip output
   r - send tip-ring output
   v - new output value
   s - new increment step
+  c - command duration
+  h - get help
 )";
 
 Systronix_AD5274 my_ad5274(POT_ADDR);
@@ -47,7 +50,7 @@ void setup()
 	{
 		Serial.print("RDAC unlock successful: ");
 		Serial.println(read_from_ad5274);
-	} 
+	}
     else
 	{
 		Serial.print("RDAC unlock failed: ");
@@ -58,11 +61,62 @@ void setup()
 
 void loop()
 {
-    char cmd = 0;
-	Serial.print("Command? > ");
-    while(Serial.available() == 0);
-    cmd = Serial.read();
-    Serial.println();
+    uint16_t inputCmd = getInputAnalog();
+    handleInputCmd(inputCmd);
+
+    // if (! KINDA_EQUAL(inputCmd, INPUT_IDLE_VALUE)) {
+    // }
+    if (Serial.available() != 0) {
+        Serial.print("Command? > ");
+        char cmd = Serial.read();
+        Serial.println();
+        handleInteractiveAction(cmd);
+    }
+}
+
+void handleInputCmd(uint16_t value) {
+    if (KINDA_EQUAL(value, IN_VOLUME_UP)) {
+        sendCommand(OUT_VOLUME_UP, false, cmdDuration);
+    }
+    if (KINDA_EQUAL(value, IN_VOLUME_DOWN)) {
+        sendCommand(OUT_VOLUME_DOWN, false, cmdDuration);
+    }
+    if (KINDA_EQUAL(value, IN_ARROW_UP)) {
+        sendCommand(OUT_NEXT_TRACK, false, cmdDuration);
+    }
+    if (KINDA_EQUAL(value, IN_ARROW_DOWN)) {
+        sendCommand(OUT_PREV_TRACK, false, cmdDuration);
+    }
+    if (KINDA_EQUAL(value, IN_MODE)) {
+        sendCommand(OUT_SWITCH_SOURCE, false, cmdDuration);
+    }
+}
+
+uint16_t getInputAnalog() {
+    uint16_t avg = 0;
+    for(byte i = 0; i < INPUT_SAMPLES; i++) {
+        avg += analogRead(INPUT_ANALOG);
+        delay(INPUT_SAMPLE_INTERVAL);
+    }
+    return (avg / INPUT_SAMPLES);
+}
+
+void sendCommand(uint16_t value, bool useRing, uint16_t duration) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    // set wiper
+    my_ad5274.command_write(AD5274_RDAC_WRITE, value);
+
+    // open gates
+    PORTB |= ((1 << TIP_PIN) + ((useRing ? 1 : 0) << RING_PIN));
+    
+    delay(duration);
+    
+    //close gates
+    PORTB &= ~((1 << TIP_PIN) + ((useRing ? 1 : 0) << RING_PIN));
+    digitalWrite(LED_BUILTIN, LOW);
+}
+
+void handleInteractiveAction(char cmd) {
     switch(cmd) {
         case 'h':
             Serial.println(helpString);
@@ -76,15 +130,17 @@ void loop()
             Serial.println(autoIncrement ? "on":"off");
             break;
         case 'p':
-            Serial.print("Current output is at: ");
+            Serial.print("Output: ");
             Serial.print(currentOutput, DEC);
-            Serial.print(" | Current increment step is: ");
+            Serial.print(" | Duration: ");
+            Serial.print(cmdDuration, DEC);
+            Serial.print(" | Increment step: ");
             Serial.print(incrementStep, DEC);
-            Serial.print(" | Auto-increment is: ");
+            Serial.print(" | Auto-increment: ");
             Serial.println(autoIncrement ? "on":"off");
             break;
         case 't':
-            sendCommand(currentOutput);
+            sendCommand(currentOutput, false, cmdDuration);
             if(autoIncrement) {
                 currentOutput += incrementStep;
                 if (currentOutput > 1023)
@@ -93,7 +149,7 @@ void loop()
             }
             break;
         case 'r':
-            sendCommand(currentOutput, true);
+            sendCommand(currentOutput, true, cmdDuration);
             if(autoIncrement) {
                 currentOutput += incrementStep;
                 if (currentOutput > 1023)
@@ -115,14 +171,11 @@ void loop()
             incrementStep = Serial.parseInt();
             Serial.println("\nIncrement step set to " + String(incrementStep));
             break;
+        case 'c':
+            Serial.print(F("New command duration value? > "));
+            while(Serial.available() == 0);
+            cmdDuration = Serial.parseInt();
+            Serial.println("\nIncrement command duration to " + String(cmdDuration));
+            break;
     }
-}
-
-uint16_t getInputAnalog() {
-    uint16_t avg = 0;
-    for(byte i = 0; i < INPUT_SAMPLES; i++) {
-        avg += analogRead(INPUT_ANALOG);
-        delay(INPUT_SAMPLE_INTERVAL);
-    }
-    return (avg / INPUT_SAMPLES);
 }
