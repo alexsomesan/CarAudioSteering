@@ -1,3 +1,4 @@
+#include <FastADC.h>
 #include <Systronix_AD5274.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
@@ -32,15 +33,16 @@ Use one of the following:
 )";
 
 Systronix_AD5274 digipot(POT_ADDR);
+FastADC(analog_in, INPUT_ANALOG, true);
 
 void setup()
 {
     DDRB = DDRB | B00001100;
+    analog_in.reference(INPUT_ANALOG, INTERNAL);
     Serial.begin(115200); // use max baud rate
     while ((!Serial) && (millis() < 10000))
         ;
-    Serial.print("Command scanner for Pioneer AppRadio.\nAD5272 at 0x");
-    Serial.println(digipot.BaseAddr, HEX);
+    Serial.println("Car audio steering. Hello :)");
 
     int8_t status = 0;
     int16_t read_from_ad5274 = 0;
@@ -70,7 +72,7 @@ void setup()
 
 void loop()
 {
-    uint16_t inputCmd = analogRead(INPUT_ANALOG); // Formerly getInputAnalog()
+    uint16_t inputCmd = analog_in.read(INPUT_ANALOG); //analogRead(INPUT_ANALOG);
     switch (runState)
     {
     case RUN_IDLE:
