@@ -1,7 +1,7 @@
 {
-    "sketch": "CarAudioRemoteScanner.ino",
+    "sketch": "CarAudioSteering.ino",
     "board": "arduino:avr:pro",
     "configuration": "cpu=16MHzatmega328",
-    "port": "COM9",
+    "port": "/dev/cu.usbserial-A603OS7Z",
     "output": "../_build"
 }
