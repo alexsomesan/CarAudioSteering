@@ -1,7 +1,0 @@
-{
-    "sketch": "CarAudioSteering.ino",
-    "board": "arduino:avr:pro",
-    "configuration": "cpu=16MHzatmega328",
-    "port": "/dev/cu.usbserial-A603OS7Z",
-    "output": "../_build"
-}
