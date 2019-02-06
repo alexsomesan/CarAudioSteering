@@ -1,8 +1,11 @@
+#include "config.h"
+
+#ifdef ENABLE_FASTADC
 #include <FastADC.h>
+#endif
 #include <Systronix_AD5274.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
-#include "config.h"
 
 #define KINDA_EQUALS(A, B) ((A - B) < INPUT_SWAY || (B - A) < INPUT_SWAY)
 
@@ -12,12 +15,13 @@ enum RUN_STATES
     RUN_BUTTON_PRESSED
 };
 
-byte runState = RUN_IDLE;
+byte runState = -1;
 
 bool autoIncrement = false;
 uint16_t currentOutput = 0;
 uint16_t incrementStep = 1;
 uint16_t cmdDuration = CMD_DURATION;
+uint16_t inputCmd;
 
 const char *helpString = R"(
 Use one of the following:
@@ -33,12 +37,16 @@ Use one of the following:
 )";
 
 Systronix_AD5274 digipot(POT_ADDR);
-FastADC(analog_in, INPUT_ANALOG, true);
+#ifdef ENABLE_FASTADC
+FastADC(analog_in, 1, true);
+#endif
 
 void setup()
 {
     DDRB = DDRB | B00001100;
+#ifdef ENABLE_FASTADC
     analog_in.reference(INPUT_ANALOG, INTERNAL);
+#endif
     Serial.begin(115200); // use max baud rate
     while ((!Serial) && (millis() < 10000))
         ;
@@ -68,25 +76,35 @@ void setup()
         Serial.println(read_from_ad5274);
     }
     pinMode(LED_BUILTIN, OUTPUT);
+    runState = RUN_IDLE;
+#ifdef ENABLE_FASTADC
+    Serial.print(analog_in.getDebug());
+#endif
+    Serial.print("Command? > ");
 }
 
 void loop()
 {
-    uint16_t inputCmd = analog_in.read(INPUT_ANALOG); //analogRead(INPUT_ANALOG);
+#ifdef ENABLE_FASTADC
+    inputCmd = analog_in.read(INPUT_ANALOG);
+#else
+    inputCmd = analogRead(INPUT_ANALOG);
+#endif
     switch (runState)
     {
     case RUN_IDLE:
+        // Handle interactive activity
         if (handleInputCmd(inputCmd))
         {
             runState = RUN_BUTTON_PRESSED;
+            digitalWrite(LED_BUILTIN, HIGH);
         }
-        // Handle interactive activity
-        if (Serial.available() != 0)
+        else
         {
-            Serial.print("Command? > ");
-            char cmd = Serial.read();
-            Serial.println();
-            handleInteractiveAction(cmd);
+            if (!KINDA_EQUALS(inputCmd, INPUT_IDLE_VALUE))
+            {
+                Serial.println("Unkown input: " + String(inputCmd));
+            }
         }
         break;
     case RUN_BUTTON_PRESSED:
@@ -94,10 +112,16 @@ void loop()
         {
             endCommand();
             runState = RUN_IDLE;
+            digitalWrite(LED_BUILTIN, LOW);
         }
         break;
-    default:
-        break;
+    }
+    if (Serial.available() != 0)
+    {
+        char cmd = Serial.read();
+        Serial.println();
+        handleInteractiveAction(cmd);
+        Serial.print("Command? > ");
     }
 }
 
