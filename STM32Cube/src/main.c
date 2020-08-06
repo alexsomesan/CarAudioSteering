@@ -44,7 +44,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define AD5272_ADDRESS (0x2F << 1)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -82,7 +81,6 @@ void SystemClock_Config(void);
 int main(void)
 {
     /* USER CODE BEGIN 1 */
-    memset(readouts, 0, BUT_BUF_LEN *2);
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -111,17 +109,7 @@ int main(void)
 
     HAL_ADCEx_Calibration_Start(&hadc);
 
-    HAL_GPIO_WritePin(POT_RST_GPIO_Port, POT_RST_Pin, GPIO_PIN_SET);
-    HAL_Delay(100);
-
-    int8_t i2cErr = AD5272_command_write(&hi2c1, AD5272_ADDRESS, 0x00, 0x0000);
-    SEGGER_RTT_printf(0, "I2C NOP status %d\n", i2cErr);
-    HAL_Delay(200);
-
-    i2cErr = AD5272_control_write_verified(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WIPER_WRITE_ENABLE);
-    SEGGER_RTT_printf(0, "I2C WPEN status %d\n", i2cErr);
-    HAL_Delay(200);
-
+    InitDigipot();
     InitCommands();
 
     HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
@@ -138,14 +126,13 @@ int main(void)
         while (0 == (intFlags & FL_AVG_READY));
 
         // uint32_t diff = abs(avg - average);
+        // SEGGER_RTT_printf(0, "ADC val %d (diff %d)\r", avg, diff);
 
         avg = average;
         intFlags ^= FL_AVG_READY;
         // HAL_GPIO_WritePin(ACTIVITY_GPIO_Port, ACTIVITY_Pin, GPIO_PIN_RESET);
 
         ProcessInput(avg);
-
-        // SEGGER_RTT_printf(0, "ADC val %d (diff %d)\r", avg, diff);
 
         /* USER CODE END WHILE */
 

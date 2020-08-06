@@ -1,5 +1,19 @@
 #include "ad5272.h"
+#include "gpio.h"
+#include "i2c.h"
 #include "SEGGER_RTT.h"
+
+void InitDigipot() {
+  	// Reset digipot
+    HAL_GPIO_WritePin(POT_RST_GPIO_Port, POT_RST_Pin, GPIO_PIN_SET);
+    HAL_Delay(100);
+
+    int8_t i2cErr = AD5272_command_write(&hi2c1, AD5272_ADDRESS, 0x00, 0x0000);
+    HAL_Delay(200);
+
+    i2cErr = AD5272_control_write_verified(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WIPER_WRITE_ENABLE);
+    HAL_Delay(200);
+}
 
 int8_t AD5272_command_write(I2C_HandleTypeDef *bus, uint8_t address, uint8_t command, uint16_t write_datum16)
 {
