@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
-#include "btinput.h"
+#include "commands.h"
 #include "SEGGER_RTT.h"
 
 enum _states {
@@ -25,7 +25,7 @@ enum _states {
 
 uint32_t currentState = STATE_IDLE;
 
-void ProcEvent(uint32_t ev) {
+void ProcessEvent(uint32_t ev) {
     switch (currentState)
     {
     case STATE_IDLE:
@@ -35,35 +35,35 @@ void ProcEvent(uint32_t ev) {
             break;
         case Button1:
             currentState = STATE_BT1_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button1);
+            buttons[Button1].callback();
             break;
         case Button2:
             currentState = STATE_BT2_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button2);
+            buttons[Button2].callback();
             break;
         case Button3:
             currentState = STATE_BT3_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button3);
+            buttons[Button3].callback();
             break;
         case Button4:
             currentState = STATE_BT4_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button4);
+            buttons[Button4].callback();
             break;
         case Button5:
             currentState = STATE_BT5_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button5);
+            buttons[Button5].callback();
             break;
         case Button6:
             currentState = STATE_BT6_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button6);
+            buttons[Button6].callback();
             break;
         case Button7:
             currentState = STATE_BT7_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button7);
+            buttons[Button7].callback();
             break;
         case Button8:
             currentState = STATE_BT8_DOWN;
-            SEGGER_RTT_printf(0, "Button %d DOWN\n", Button8);
+            buttons[Button8].callback();
             break;
         default:
             SEGGER_RTT_printf(0, "Unsupported event %d in state %d\n", ev, currentState);
@@ -81,7 +81,7 @@ void ProcEvent(uint32_t ev) {
         switch (ev)
         {
         case ButtonIdle:
-            SEGGER_RTT_printf(0, "Button %d UP\n", currentState);
+            buttons[ButtonIdle].callback();
             currentState = STATE_IDLE;
             break;
         default:

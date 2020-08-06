@@ -4,14 +4,14 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+    #endif
 
-#include <stdint.h>
-#include <stdlib.h>
- 
-void ProcEvent(uint32_t ev);
+    #include <stdint.h>
+    #include <stdlib.h>
 
-#ifdef __cplusplus
+    void ProcessEvent(uint32_t ev);
+
+    #ifdef __cplusplus
 }
 #endif
 

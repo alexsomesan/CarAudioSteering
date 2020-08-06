@@ -32,8 +32,8 @@
 #include "math.h"
 #include "SEGGER_RTT.h"
 #include "ad5272.h"
-#include "btinput.h"
 #include "statemachine.h"
+#include "commands.h"
 
 /* USER CODE END Includes */
 
@@ -49,7 +49,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define NUM_BUTTONS 8
 #define BUT_BUF_LEN 256
 
 #define FL_AVG_READY  0x00000001
@@ -59,10 +58,9 @@
 
 /* USER CODE BEGIN PV */
 uint16_t readouts[BUT_BUF_LEN];
-uint16_t buttonVals[NUM_BUTTONS + 1];
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
-uint8_t bracket = 10;
+
 
 /* USER CODE END PV */
 
@@ -124,19 +122,11 @@ int main(void)
     SEGGER_RTT_printf(0, "I2C WPEN status %d\n", i2cErr);
     HAL_Delay(200);
 
+    InitCommands();
+
     HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
 
     uint32_t avg = 4096;
-
-    buttonVals[ButtonIdle] = 4099;
-    buttonVals[Button1] = 3372;
-    buttonVals[Button2] = 3154;
-    buttonVals[Button3] = 2915;
-    buttonVals[Button4] = 2573;
-    buttonVals[Button5] = 2188;
-    buttonVals[Button6] = 1701;
-    buttonVals[Button7] = 1210;
-    buttonVals[Button8] = 602;
 
     /* USER CODE END 2 */
 
@@ -144,26 +134,22 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1)
     {
-      // wait for DMA interrupt
-      while (0 == (intFlags & FL_AVG_READY));
+        // wait for DMA interrupt
+        while (0 == (intFlags & FL_AVG_READY));
 
-      uint32_t diff = abs(avg - average);
-      avg = average;
-      intFlags ^= FL_AVG_READY;
-      // HAL_GPIO_WritePin(ACTIVITY_GPIO_Port, ACTIVITY_Pin, GPIO_PIN_RESET);
+        // uint32_t diff = abs(avg - average);
 
-      // SEGGER_RTT_printf(0, "ADC val %d (diff %d)\r", avg, diff);
+        avg = average;
+        intFlags ^= FL_AVG_READY;
+        // HAL_GPIO_WritePin(ACTIVITY_GPIO_Port, ACTIVITY_Pin, GPIO_PIN_RESET);
 
-      for(uint32_t i = 0; i < NUM_BUTTONS+1; i++) {
-        if ((buttonVals[i]-bracket) < avg && (buttonVals[i]+bracket > avg)) {
-          // SEGGER_RTT_printf(0, "Button %d\r", i);
-          ProcEvent(i);
-        }
-      }
+        ProcessInput(avg);
 
-      /* USER CODE END WHILE */
+        // SEGGER_RTT_printf(0, "ADC val %d (diff %d)\r", avg, diff);
 
-      /* USER CODE BEGIN 3 */
+        /* USER CODE END WHILE */
+
+        /* USER CODE BEGIN 3 */
 
     }
     /* USER CODE END 3 */
