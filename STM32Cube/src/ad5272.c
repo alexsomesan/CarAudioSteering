@@ -8,10 +8,10 @@ void InitDigipot() {
     HAL_GPIO_WritePin(POT_RST_GPIO_Port, POT_RST_Pin, GPIO_PIN_SET);
     HAL_Delay(100);
 
-    int8_t i2cErr = AD5272_command_write(&hi2c1, AD5272_ADDRESS, 0x00, 0x0000);
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, 0x00, 0x0000);
     HAL_Delay(200);
 
-    i2cErr = AD5272_control_write_verified(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WIPER_WRITE_ENABLE);
+    AD5272_control_write_verified(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WIPER_WRITE_ENABLE);
     HAL_Delay(200);
 }
 
