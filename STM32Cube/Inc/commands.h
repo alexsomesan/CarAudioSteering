@@ -10,9 +10,9 @@ extern "C"
 
     #define OUTPUT_ALT_FLAG 0x8000;
 
-    #define NUM_BUTTONS 8
+    #define NUM_BUTTONS 9
 
-    enum buttons {
+    enum _buttons {
         ButtonIdle, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8
     };
 
@@ -23,7 +23,7 @@ extern "C"
         char name[7];
     } ButtonCommand;
 
-    extern ButtonCommand buttons[NUM_BUTTONS + 1];
+    extern ButtonCommand buttons[NUM_BUTTONS];
 
     void InitCommands();
     void ProcessInput(uint32_t inVal);

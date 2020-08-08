@@ -48,7 +48,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define BUT_BUF_LEN 400
+#define BUT_BUF_LEN 512
 
 #define FL_AVG_READY  0x00000001
 /* USER CODE END PM */
@@ -56,7 +56,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint16_t readouts[BUT_BUF_LEN];
+static uint16_t *readouts;
+
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
 
@@ -81,6 +82,7 @@ void SystemClock_Config(void);
 int main(void)
 {
     /* USER CODE BEGIN 1 */
+    readouts = malloc(sizeof(uint16_t)*BUT_BUF_LEN);
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -139,6 +141,7 @@ int main(void)
         /* USER CODE BEGIN 3 */
 
     }
+    free(readouts);
     /* USER CODE END 3 */
 }
 

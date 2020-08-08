@@ -5,7 +5,8 @@
 #include <SEGGER_RTT.h>
 
 uint8_t bracket = 10;
-ButtonCommand buttons[NUM_BUTTONS + 1];
+
+ButtonCommand buttons[NUM_BUTTONS];
 
 void InitCommands() {
     buttons[ButtonIdle].input = 4099;
@@ -50,7 +51,7 @@ void InitCommands() {
 }
 
 void ProcessInput(uint32_t inVal) {
-    for (uint32_t i = 0; i < NUM_BUTTONS+1; i++) {
+    for (uint32_t i = 0; i < NUM_BUTTONS; i++) {
         if (((buttons[i].input - bracket) < inVal) && ((buttons[i].input + bracket) > inVal)) {
             ProcessEvent(i);
         }
