@@ -58,8 +58,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ACTIVITY_Pin GPIO_PIN_4
-#define ACTIVITY_GPIO_Port GPIOA
+#define RING_SW_Pin GPIO_PIN_6
+#define RING_SW_GPIO_Port GPIOA
 #define POT_RST_Pin GPIO_PIN_7
 #define POT_RST_GPIO_Port GPIOA
 #define BUTTONS_Pin GPIO_PIN_1

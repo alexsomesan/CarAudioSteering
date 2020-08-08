@@ -8,6 +8,8 @@ extern "C"
     #include <stdint.h>
     #include <stdlib.h>
 
+    #define OUTPUT_ALT_FLAG 0x8000;
+
     #define NUM_BUTTONS 8
 
     enum buttons {
@@ -18,6 +20,7 @@ extern "C"
         uint16_t input;
         uint16_t output;
         void (*callback)(void);
+        char name[7];
     } ButtonCommand;
 
     extern ButtonCommand buttons[NUM_BUTTONS + 1];

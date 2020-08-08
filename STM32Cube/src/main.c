@@ -48,7 +48,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define BUT_BUF_LEN 256
+#define BUT_BUF_LEN 400
 
 #define FL_AVG_READY  0x00000001
 /* USER CODE END PM */
@@ -189,11 +189,17 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* myadc) {
-    // HAL_GPIO_WritePin(ACTIVITY_GPIO_Port, ACTIVITY_Pin, GPIO_PIN_SET);
-    for (int i = 0; i < BUT_BUF_LEN; i++) {
+    for (int i = BUT_BUF_LEN / 2 ; i < BUT_BUF_LEN; i++) {
         average += readouts[i];
     }
-    average /= BUT_BUF_LEN;
+    average /= BUT_BUF_LEN / 2;
+    intFlags |= FL_AVG_READY;
+}
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
+    for (int i = 0; i < BUT_BUF_LEN / 2; i++) {
+        average += readouts[i];
+    }
+    average /= BUT_BUF_LEN / 2;
     intFlags |= FL_AVG_READY;
 }
 /* USER CODE END 4 */
