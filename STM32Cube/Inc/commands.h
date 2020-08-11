@@ -4,16 +4,15 @@
 #ifdef __cplusplus
 extern "C"
 {
-    #endif
+#endif
     #include <stdint.h>
     #include <stdlib.h>
 
     #define OUTPUT_ALT_FLAG 0x8000;
 
-    #define NUM_BUTTONS 9
-
     enum _buttons {
-        ButtonIdle, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8
+        Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,
+        ButtonIdle, ButtonCount // these two must always come last, in this exact order
     };
 
     typedef struct _btncmd {
@@ -23,7 +22,7 @@ extern "C"
         char name[7];
     } ButtonCommand;
 
-    extern ButtonCommand buttons[NUM_BUTTONS];
+    extern ButtonCommand buttons[ButtonCount];
 
     void InitCommands();
     void ProcessInput(uint32_t inVal);

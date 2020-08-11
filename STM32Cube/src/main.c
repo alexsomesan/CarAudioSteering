@@ -28,6 +28,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <config.h>
 #include "memory.h"
 #include "math.h"
 #include "SEGGER_RTT.h"
@@ -39,7 +40,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -48,8 +48,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define BUT_BUF_LEN 512
-
 #define FL_AVG_READY  0x00000001
 /* USER CODE END PM */
 
@@ -117,6 +115,7 @@ int main(void)
     HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
 
     uint32_t avg = 4096;
+    char avgstr[10];
 
     /* USER CODE END 2 */
 
@@ -127,12 +126,11 @@ int main(void)
         // wait for DMA interrupt
         while (0 == (intFlags & FL_AVG_READY));
 
-        // uint32_t diff = abs(avg - average);
-        // SEGGER_RTT_printf(0, "ADC val %d (diff %d)\r", avg, diff);
-
         avg = average;
         intFlags ^= FL_AVG_READY;
-        // HAL_GPIO_WritePin(ACTIVITY_GPIO_Port, ACTIVITY_Pin, GPIO_PIN_RESET);
+
+        sprintf(avgstr, "%ld\r\n", avg);
+        SEGGER_RTT_TerminalOut(1, avgstr);
 
         ProcessInput(avg);
 
@@ -196,13 +194,40 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* myadc) {
         average += readouts[i];
     }
     average /= BUT_BUF_LEN / 2;
+#if VARIO_FILTER
+    uint32_t maxVar = 0;
+    for (int i = BUT_BUF_LEN / 2 ; i < BUT_BUF_LEN; i++) {
+        uint32_t diff = abs((uint32_t)readouts[i] - average);
+        if (diff > maxVar) {
+            maxVar = diff;
+        }
+    }
+    char maxstr[10];
+    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+    if (maxVar > MAX_VARIATION) 
+        return;
+#endif
     intFlags |= FL_AVG_READY;
 }
+
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
     for (int i = 0; i < BUT_BUF_LEN / 2; i++) {
         average += readouts[i];
     }
     average /= BUT_BUF_LEN / 2;
+#if VARIO_FILTER
+    uint32_t maxVar = 0;
+    for (int i = 0; i < BUT_BUF_LEN / 2; i++) {
+        uint32_t diff = abs((uint32_t)readouts[i] - average);
+        if (diff > maxVar) {
+            maxVar = diff;
+        }
+    }
+    char maxstr[10];
+    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+    if (maxVar > MAX_VARIATION) 
+        return;
+#endif
     intFlags |= FL_AVG_READY;
 }
 /* USER CODE END 4 */
