@@ -8,7 +8,7 @@ extern "C"
 #include <stdint.h>
 #include <stdlib.h>
 
-#define OUTPUT_ALT_FLAG 0x8000;
+#define OUTPUT_ALT_FLAG 0x8000
 
 enum _buttons {
     Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,

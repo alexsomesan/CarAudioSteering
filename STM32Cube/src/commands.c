@@ -4,6 +4,9 @@
 #include <commands.h>
 #include <statemachine.h>
 #include <SEGGER_RTT.h>
+#include <ad5272.h>
+#include <i2c.h>
+
 
 uint8_t bracket = TOLERANCE;
 
@@ -28,7 +31,7 @@ void InitCommands() {
     buttons[Button5].output = 160;   /* VOLUME_UP */
     buttons[Button6].output = 240;   /* VOLUME_DOWN */
     buttons[Button7].output = 450;   /* RADIO_BAND */
-    buttons[Button8].output = 1024;
+    buttons[Button8].output = 1023;
 
     memcpy(buttons[Button1].name, "SWSRC", 5);
     memcpy(buttons[Button2].name, "MUTEATT", 7);
@@ -61,45 +64,70 @@ void ProcessInput(uint32_t inVal) {
 
 void Button1Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button1].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button1].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button1].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button2Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button2].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button2].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button2].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button3Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button3].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button3].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button3].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button4Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button4].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button4].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button4].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button5Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button5].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button5].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button5].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button6Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button6].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button6].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button6].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button7Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button7].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button7].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button7].output & ~OUTPUT_ALT_FLAG);
 }
 
 void Button8Callback() {
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button8].name);
-    HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    if (buttons[Button8].output & OUTPUT_ALT_FLAG) {
+        HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+    }
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[Button8].output & ~OUTPUT_ALT_FLAG);
 }
 
 void ButtonIdleCallback() {
     SEGGER_RTT_printf(0, "Button UP\r\n");
     HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
+    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[ButtonIdle].output & ~OUTPUT_ALT_FLAG);
 }
