@@ -5,6 +5,7 @@
 
 #define VARIO_FILTER  0
 #define MAX_VARIATION 6
+#define TOLERANCE 20
 
 
 #endif

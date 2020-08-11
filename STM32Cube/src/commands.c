@@ -1,10 +1,11 @@
 #include "memory.h"
 #include "gpio.h"
+#include <config.h>
 #include <commands.h>
 #include <statemachine.h>
 #include <SEGGER_RTT.h>
 
-uint8_t bracket = 20;
+uint8_t bracket = TOLERANCE;
 
 ButtonCommand buttons[ButtonCount];
 

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <config.h>
 #include "commands.h"
 #include "SEGGER_RTT.h"
 

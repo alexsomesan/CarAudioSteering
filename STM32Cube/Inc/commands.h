@@ -5,40 +5,40 @@
 extern "C"
 {
 #endif
-    #include <stdint.h>
-    #include <stdlib.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-    #define OUTPUT_ALT_FLAG 0x8000;
+#define OUTPUT_ALT_FLAG 0x8000;
 
-    enum _buttons {
-        Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,
-        ButtonIdle, ButtonCount // these two must always come last, in this exact order
-    };
+enum _buttons {
+    Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,
+    ButtonIdle, ButtonCount // these two must always come last, in this exact order
+};
 
-    typedef struct _btncmd {
-        uint16_t input;
-        uint16_t output;
-        void (*callback)(void);
-        char name[7];
-    } ButtonCommand;
+typedef struct _btncmd {
+    uint16_t input;
+    uint16_t output;
+    void (*callback)(void);
+    char name[7];
+} ButtonCommand;
 
-    extern ButtonCommand buttons[ButtonCount];
+extern ButtonCommand buttons[ButtonCount];
 
-    void InitCommands();
-    void ProcessInput(uint32_t inVal);
+void InitCommands();
+void ProcessInput(uint32_t inVal);
 
-    void ButtonIdleCallback();
+void ButtonIdleCallback();
 
-    void Button1Callback();
-    void Button2Callback();
-    void Button3Callback();
-    void Button4Callback();
-    void Button5Callback();
-    void Button6Callback();
-    void Button7Callback();
-    void Button8Callback();
+void Button1Callback();
+void Button2Callback();
+void Button3Callback();
+void Button4Callback();
+void Button5Callback();
+void Button6Callback();
+void Button7Callback();
+void Button8Callback();
 
-    #ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 
