@@ -13,34 +13,34 @@ uint8_t bracket = TOLERANCE;
 ButtonCommand buttons[ButtonCount];
 
 void InitCommands() {
-    buttons[ButtonIdle].input = 4096;
-    buttons[Button1].input = 3372;
-    buttons[Button2].input = 3158;
-    buttons[Button3].input = 2915;
-    buttons[Button4].input = 2578;
-    buttons[Button5].input = 2194;
-    buttons[Button6].input = 1708;
-    buttons[Button7].input = 1215;
-    buttons[Button8].input = 610;
+    buttons[ButtonIdle].input = 3807;
+    buttons[Button1].input = 426;    /* MODE */
+    buttons[Button2].input = 875;    /* NEXT_TRACK */
+    buttons[Button3].input = 1285;   /* PREV_TRACK */
+    buttons[Button4].input = 1725;   /* VOLUME_UP */
+    buttons[Button5].input = 2110;   /* VOLUME_DOWN */
+    buttons[Button6].input = 2489;   /* VOICE_CMD */
+    buttons[Button7].input = 2778;   /* PHONE_UP */
+    buttons[Button8].input = 3045;   /* PHONE_UP */
 
     buttons[ButtonIdle].output = 1023;
-    buttons[Button1].output = 13;    /* SWITCH_SOURCE */
-    buttons[Button2].output = 35;    /* MUTE_ATT */
-    buttons[Button3].output = 70;    /* NEXT_TRACK */
-    buttons[Button4].output = 105;   /* PREV_TRACK */
-    buttons[Button5].output = 160;   /* VOLUME_UP */
-    buttons[Button6].output = 240;   /* VOLUME_DOWN */
-    buttons[Button7].output = 450;   /* RADIO_BAND */
+    buttons[Button1].output = 1023;    /* SWITCH_SOURCE */
+    buttons[Button2].output = 1023;    /* NEXT_TRACK */
+    buttons[Button3].output = 1023;    /* PREV_TRACK */
+    buttons[Button4].output = 1023;    /* VOLUME_UP */
+    buttons[Button5].output = 1023;    /* VOLUME_DOWN */
+    buttons[Button6].output = 1023;    /* SIRI */
+    buttons[Button7].output = 1023;
     buttons[Button8].output = 1023;
 
-    memcpy(buttons[Button1].name, "SWSRC", 5);
-    memcpy(buttons[Button2].name, "MUTEATT", 7);
-    memcpy(buttons[Button3].name, "NXTRACK", 7);
-    memcpy(buttons[Button4].name, "PVTRACK", 7);
-    memcpy(buttons[Button5].name, "VOLUP", 5);
-    memcpy(buttons[Button6].name, "VOLDOWN", 7);
-    memcpy(buttons[Button7].name, "RDIOBND", 7);
-    memcpy(buttons[Button8].name, "NO-OP", 5);
+    memcpy(buttons[Button1].name, "MODE",    5);
+    memcpy(buttons[Button2].name, "NEXT_TRK", 9);
+    memcpy(buttons[Button3].name, "PERV_TRK", 9);
+    memcpy(buttons[Button4].name, "VOL_UP",  7);
+    memcpy(buttons[Button5].name, "VOL_DWN", 8);
+    memcpy(buttons[Button6].name, "VOICE_CMD", 10);
+    memcpy(buttons[Button7].name, "PHONE_DWN", 10);
+    memcpy(buttons[Button8].name, "PHONE_UP", 9);
 
     buttons[Button1].callback = &Button1Callback;
     buttons[Button2].callback = &Button2Callback;
