@@ -66,26 +66,26 @@ void MainDialog::slotDisconnectSerial() {
 }
 
 void MainDialog::slotSetPotValue() {
-    uint16_t potVal = ui->potValueSlider->value();
-    qDebug() << "Setting pot value" << potVal;
-
-    QByteArray payload(4, Qt::Uninitialized);
-
-    payload[0] = 1; // set pot command
-
-    payload[3] = potVal & 0xFF;          // set pot val LSB
-    payload[2] = (potVal & 0xFF00) >> 8; // set pot val MSB
-
-    if (ui->ringCheckBox->checkState() == Qt::Checked) {
-        payload[1] = 1; // set ring off
-    } else {
-        payload[1] = 0; // set ring on
-    }
-
     if(serPort->isOpen()) {
+        uint16_t potVal = ui->potValueSlider->value();
+        qDebug() << "Setting pot value" << potVal;
+
+        QByteArray payload(4, Qt::Uninitialized);
+
+        payload[0] = 1; // set pot command
+
+        payload[3] = potVal & 0xFF;          // set pot val LSB
+        payload[2] = (potVal & 0xFF00) >> 8; // set pot val MSB
+
+        if (ui->ringCheckBox->checkState() == Qt::Checked) {
+            payload[1] = 1; // set ring off
+        } else {
+            payload[1] = 0; // set ring on
+        }
+
         serPort->write(payload);
         serPort->flush();
-        serPort->waitForBytesWritten();
+        // serPort->waitForBytesWritten();
         qDebug() << "Sent command:" << Qt::hex <<
             (uint8_t)(payload[0]) << "|" <<
             (uint8_t)(payload[1]) << "|" <<
@@ -94,19 +94,19 @@ void MainDialog::slotSetPotValue() {
 }
 
 void MainDialog::slotClearPotValue() {
-    qDebug() << "Clearing pot value";
-
-    QByteArray payload(4,Qt::Uninitialized);
-
-    payload[0] = 1; // set pot command
-    payload[1] = 0; // set ring off
-    payload[2] = 0x03; // set pot val MSB
-    payload[3] = 0xFF; // set pot val LSB
-
     if(serPort->isOpen()) {
+        qDebug() << "Clearing pot value";
+
+        QByteArray payload(4,Qt::Uninitialized);
+
+        payload[0] = 1; // set pot command
+        payload[1] = 0; // set ring off
+        payload[2] = 0x03; // set pot val MSB
+        payload[3] = 0xFF; // set pot val LSB
+
         serPort->write(payload);
         serPort->flush();
-        serPort->waitForBytesWritten();
+        // serPort->waitForBytesWritten();
         qDebug() << "Sent command:" << Qt::hex <<
             (uint8_t)(payload[0]) << "|" <<
             (uint8_t)(payload[1]) << "|" <<
