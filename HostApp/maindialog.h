@@ -22,9 +22,11 @@ public slots:
     void slotDisconnectSerial();
     void slotSetPotValue();
     void slotClearPotValue();
+    void slotCaptureAnalog();
 
 private:
     Ui::MainDialog *ui;
     QSerialPort *serPort;
+    bool analogCapture;
 };
 #endif // MAINDIALOG_H

@@ -49,6 +49,9 @@
 /* USER CODE BEGIN PM */
 #define FL_AVG_READY  0x00000001
 #define FL_URX_READY  0x00000002
+#define FL_UTX_READY  0x00000004
+
+#define FL_FWD_ADC    0x00000004
 
 /* USER CODE END PM */
 
@@ -57,9 +60,12 @@
 /* USER CODE BEGIN PV */
 static uint16_t *readouts;
 static uint8_t* rxBuff;
+static uint8_t* txBuff;
+
 
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
+volatile uint32_t stateFlags = 0;
 
 
 /* USER CODE END PV */
@@ -84,6 +90,8 @@ int main(void)
   /* USER CODE BEGIN 1 */
     readouts = malloc(sizeof(uint16_t)*BUT_BUF_LEN);
     rxBuff = malloc(sizeof(uint8_t)*RX_BUF_LEN);
+    txBuff = malloc(sizeof(uint8_t)*TX_BUF_LEN);
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -139,6 +147,13 @@ int main(void)
                 uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
                 AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, pv);
                 break;
+              case 0x02:
+                if (rxBuff[1] == 0) {
+                  stateFlags &= ~FL_FWD_ADC;
+                } else {
+                  stateFlags |= FL_FWD_ADC;
+                  intFlags |= FL_UTX_READY;
+                }
               default:
                 SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
                 break;
@@ -149,6 +164,15 @@ int main(void)
 
         avg = average;
         intFlags ^= FL_AVG_READY;
+
+        if ((intFlags & FL_UTX_READY ) && (stateFlags & FL_FWD_ADC)) {
+          txBuff[0] = 0x02;
+          txBuff[1] = (avg >> 8) & 0xFF;
+          txBuff[2] = avg & 0xFF;
+          txBuff[3] = 0;
+          intFlags ^= FL_UTX_READY;
+          HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN);
+        }
 
         sprintf(avgstr, "%ld\r\n", avg);
         SEGGER_RTT_TerminalOut(1, avgstr);
@@ -256,6 +280,11 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   intFlags |= FL_URX_READY;
 }
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+  intFlags |= FL_UTX_READY;
+}
+
 /* USER CODE END 4 */
 
 /**

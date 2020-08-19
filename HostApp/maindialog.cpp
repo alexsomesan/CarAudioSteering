@@ -20,6 +20,7 @@ MainDialog::MainDialog(QWidget *parent)
         ui->speedComboBox->addItem(QString::number(br, 10));
     }
     ui->speedComboBox->setCurrentIndex(bauds.indexOf(115200));
+    analogCapture = false;
 }
 
 MainDialog::~MainDialog()
@@ -46,11 +47,11 @@ void MainDialog::slotConnectSerial() {
     serPort->setBaudRate(bSpeed);
 
     if (serPort->open(QIODevice::ReadWrite)) {
-        qDebug() << "Connected";
+        ui->statusLabel->setText(QString("Connected to %1 at %2 baudrate").arg(portName).arg(bSpeed));
         ui->disconnectPushButton->setEnabled(true);
         ui->connectPushButton->setEnabled(false);
     } else {
-        qDebug() << "Failed to connect";
+        ui->statusLabel->setText("Failed to connect");
         ui->disconnectPushButton->setEnabled(false);
         ui->connectPushButton->setEnabled(true);
     }
@@ -58,10 +59,10 @@ void MainDialog::slotConnectSerial() {
 
 void MainDialog::slotDisconnectSerial() {
     if (serPort->isOpen()) {
-        qDebug() << "Closing port" << serPort->portName();
         serPort->close();
         ui->disconnectPushButton->setEnabled(false);
         ui->connectPushButton->setEnabled(true);
+        ui->statusLabel->setText("Disconnected");
     }
 }
 
@@ -112,4 +113,25 @@ void MainDialog::slotClearPotValue() {
             (uint8_t)(payload[1]) << "|" <<
             (uint8_t)(payload[2]) << (uint8_t)(payload[3]);
     }
+}
+
+void MainDialog::slotCaptureAnalog() {
+    QByteArray payload(4,Qt::Uninitialized);
+
+    payload[0] = 2; // set pot command
+    payload[2] = 0x00; // set pot val MSB
+    payload[3] = 0x00; // set pot val LSB
+    
+    if (analogCapture) {
+        analogCapture = false;
+        ui->analogButton->setText("Capture");
+        payload[1] = 0; // set ring off
+    } else {
+        payload[1] = 1; // set ring off
+        analogCapture = true;
+        ui->analogButton->setText("Stop");
+    }    
+
+    serPort->write(payload);
+    serPort->flush();
 }
