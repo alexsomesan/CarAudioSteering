@@ -154,6 +154,7 @@ int main(void)
                   stateFlags |= FL_FWD_ADC;
                   intFlags |= FL_UTX_READY;
                 }
+                break;
               default:
                 SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
                 break;
