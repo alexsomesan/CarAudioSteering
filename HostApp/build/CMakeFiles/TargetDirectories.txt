@@ -1,0 +1,4 @@
+/home/alex/work/CarAudioSteering/HostApp/build/CMakeFiles/rebuild_cache.dir
+/home/alex/work/CarAudioSteering/HostApp/build/CMakeFiles/edit_cache.dir
+/home/alex/work/CarAudioSteering/HostApp/build/CMakeFiles/HostApp.dir
+/home/alex/work/CarAudioSteering/HostApp/build/CMakeFiles/HostApp_autogen.dir

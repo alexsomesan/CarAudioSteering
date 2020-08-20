@@ -118,7 +118,7 @@ void MainDialog::slotClearPotValue() {
 void MainDialog::slotCaptureAnalog() {
     QByteArray payload(4,Qt::Uninitialized);
 
-    payload[0] = 2; // set pot command
+    payload[0] = 0x02; // set pot command
     payload[2] = 0x00; // set pot val MSB
     payload[3] = 0x00; // set pot val LSB
     
@@ -134,4 +134,9 @@ void MainDialog::slotCaptureAnalog() {
 
     serPort->write(payload);
     serPort->flush();
+    qDebug() << "Sent command:" << Qt::hex <<
+        (uint8_t)(payload[0]) << "|" <<
+        (uint8_t)(payload[1]) << "|" <<
+        (uint8_t)(payload[2]) << "|" <<
+        (uint8_t)(payload[3]);
 }

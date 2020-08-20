@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/alex/work/CarAudioSteering/HostApp/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -I. -I../ -IHostApp_autogen/include -isystem /usr/include/qt -isystem /usr/include/qt/QtWidgets -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtCore -isystem /usr/lib/qt/mkspecs/linux-g++ -isystem /usr/include/qt/QtSerialPort -O3 -DNDEBUG -fPIC -std=gnu++11 -o CMakeFiles/HostApp.dir/HostApp_autogen/mocs_compilation.cpp.o -c /home/alex/work/CarAudioSteering/HostApp/build/HostApp_autogen/mocs_compilation.cpp",
+  "file": "/home/alex/work/CarAudioSteering/HostApp/build/HostApp_autogen/mocs_compilation.cpp"
+},
+{
+  "directory": "/home/alex/work/CarAudioSteering/HostApp/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -I. -I../ -IHostApp_autogen/include -isystem /usr/include/qt -isystem /usr/include/qt/QtWidgets -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtCore -isystem /usr/lib/qt/mkspecs/linux-g++ -isystem /usr/include/qt/QtSerialPort -O3 -DNDEBUG -fPIC -std=gnu++11 -o CMakeFiles/HostApp.dir/main.cpp.o -c /home/alex/work/CarAudioSteering/HostApp/main.cpp",
+  "file": "/home/alex/work/CarAudioSteering/HostApp/main.cpp"
+},
+{
+  "directory": "/home/alex/work/CarAudioSteering/HostApp/build",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SERIALPORT_LIB -DQT_WIDGETS_LIB -I. -I../ -IHostApp_autogen/include -isystem /usr/include/qt -isystem /usr/include/qt/QtWidgets -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtCore -isystem /usr/lib/qt/mkspecs/linux-g++ -isystem /usr/include/qt/QtSerialPort -O3 -DNDEBUG -fPIC -std=gnu++11 -o CMakeFiles/HostApp.dir/maindialog.cpp.o -c /home/alex/work/CarAudioSteering/HostApp/maindialog.cpp",
+  "file": "/home/alex/work/CarAudioSteering/HostApp/maindialog.cpp"
+}
+]
