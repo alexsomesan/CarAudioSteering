@@ -34,6 +34,7 @@
 #include "ad5272.h"
 #include "statemachine.h"
 #include "commands.h"
+#include "flashstorage.h"
 
 /* USER CODE END Includes */
 
@@ -156,7 +157,7 @@ int main(void)
                 }
                 break;
               default:
-                SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
+                // SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
                 break;
               }
               intFlags ^= FL_URX_READY;
@@ -176,7 +177,7 @@ int main(void)
         }
 
         sprintf(avgstr, "%ld\r\n", avg);
-        SEGGER_RTT_TerminalOut(1, avgstr);
+        // SEGGER_RTT_TerminalOut(1, avgstr);
 
         ProcessInput(avg);
 
@@ -250,7 +251,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* myadc) {
         }
     }
     char maxstr[10];
-    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+    // SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
     if (maxVar > MAX_VARIATION) 
         return;
 #endif
@@ -271,7 +272,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
         }
     }
     char maxstr[10];
-    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+    // SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
     if (maxVar > MAX_VARIATION) 
         return;
 #endif

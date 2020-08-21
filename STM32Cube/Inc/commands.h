@@ -19,7 +19,7 @@ typedef struct _btncmd {
     uint16_t input;
     uint16_t output;
     void (*callback)(void);
-    char name[10];
+    // char name[10];
 } ButtonCommand;
 
 extern ButtonCommand buttons[ButtonCount];

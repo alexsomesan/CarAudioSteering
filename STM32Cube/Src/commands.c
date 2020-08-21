@@ -33,14 +33,14 @@ void InitCommands() {
     buttons[Button7].output = 1023;
     buttons[Button8].output = 1023;
 
-    memcpy(buttons[Button1].name, "MODE",    5);
-    memcpy(buttons[Button2].name, "NEXT_TRK", 9);
-    memcpy(buttons[Button3].name, "PERV_TRK", 9);
-    memcpy(buttons[Button4].name, "VOL_UP",  7);
-    memcpy(buttons[Button5].name, "VOL_DWN", 8);
-    memcpy(buttons[Button6].name, "VOICE_CMD", 10);
-    memcpy(buttons[Button7].name, "PHONE_DWN", 10);
-    memcpy(buttons[Button8].name, "PHONE_UP", 9);
+    // memcpy(buttons[Button1].name, "MODE",    5);
+    // memcpy(buttons[Button2].name, "NEXT_TRK", 9);
+    // memcpy(buttons[Button3].name, "PERV_TRK", 9);
+    // memcpy(buttons[Button4].name, "VOL_UP",  7);
+    // memcpy(buttons[Button5].name, "VOL_DWN", 8);
+    // memcpy(buttons[Button6].name, "VOICE_CMD", 10);
+    // memcpy(buttons[Button7].name, "PHONE_DWN", 10);
+    // memcpy(buttons[Button8].name, "PHONE_UP", 9);
 
     buttons[Button1].callback = &Button1Callback;
     buttons[Button2].callback = &Button2Callback;
@@ -63,7 +63,7 @@ void ProcessInput(uint32_t inVal) {
 }
 
 void Button1Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button1].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button1].name);
     if (buttons[Button1].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -71,7 +71,7 @@ void Button1Callback() {
 }
 
 void Button2Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button2].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button2].name);
     if (buttons[Button2].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -79,7 +79,7 @@ void Button2Callback() {
 }
 
 void Button3Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button3].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button3].name);
     if (buttons[Button3].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -87,7 +87,7 @@ void Button3Callback() {
 }
 
 void Button4Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button4].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button4].name);
     if (buttons[Button4].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -95,7 +95,7 @@ void Button4Callback() {
 }
 
 void Button5Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button5].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button5].name);
     if (buttons[Button5].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -103,7 +103,7 @@ void Button5Callback() {
 }
 
 void Button6Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button6].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button6].name);
     if (buttons[Button6].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -111,7 +111,7 @@ void Button6Callback() {
 }
 
 void Button7Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button7].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button7].name);
     if (buttons[Button7].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -119,7 +119,7 @@ void Button7Callback() {
 }
 
 void Button8Callback() {
-    SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button8].name);
+    // SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[Button8].name);
     if (buttons[Button8].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
@@ -127,7 +127,7 @@ void Button8Callback() {
 }
 
 void ButtonIdleCallback() {
-    SEGGER_RTT_printf(0, "Button UP\r\n");
+    // SEGGER_RTT_printf(0, "Button UP\r\n");
     HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
     AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[ButtonIdle].output & ~OUTPUT_ALT_FLAG);
 }
