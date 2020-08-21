@@ -1,4 +1,6 @@
 /.vscode
+/HostApp/build
+/STM32Cube/.pio
 
 # Prerequisites
 *.d
