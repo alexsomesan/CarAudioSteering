@@ -8,8 +8,11 @@ MainDialog::MainDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::MainDialog)
     , serPort(new QSerialPort)
+    , serData(new QByteArray)
+    , serReadMux(new QMutex)
 {
     ui->setupUi(this);
+    slotDisableUI();
     ui->portComboBox->clear();
     Q_FOREACH(const QSerialPortInfo& pif, QSerialPortInfo::availablePorts()) {
         ui->portComboBox->addItem(pif.portName());
@@ -21,6 +24,7 @@ MainDialog::MainDialog(QWidget *parent)
     }
     ui->speedComboBox->setCurrentIndex(bauds.indexOf(115200));
     analogCapture = false;
+    connect(serPort, SIGNAL(readyRead()),this, SLOT(slotReadSerial()) );
 }
 
 MainDialog::~MainDialog()
@@ -86,7 +90,6 @@ void MainDialog::slotSetPotValue() {
 
         serPort->write(payload);
         serPort->flush();
-        // serPort->waitForBytesWritten();
         qDebug() << "Sent command:" << Qt::hex <<
             (uint8_t)(payload[0]) << "|" <<
             (uint8_t)(payload[1]) << "|" <<
@@ -107,7 +110,6 @@ void MainDialog::slotClearPotValue() {
 
         serPort->write(payload);
         serPort->flush();
-        // serPort->waitForBytesWritten();
         qDebug() << "Sent command:" << Qt::hex <<
             (uint8_t)(payload[0]) << "|" <<
             (uint8_t)(payload[1]) << "|" <<
@@ -118,25 +120,52 @@ void MainDialog::slotClearPotValue() {
 void MainDialog::slotCaptureAnalog() {
     QByteArray payload(4,Qt::Uninitialized);
 
-    payload[0] = 0x02; // set pot command
-    payload[2] = 0x00; // set pot val MSB
-    payload[3] = 0x00; // set pot val LSB
+    payload[0] = 0x02; // set adc command
+    payload[2] = 0x00; // padding
+    payload[3] = 0x00; // padding
     
     if (analogCapture) {
+        payload[1] = 0; 
         analogCapture = false;
         ui->analogButton->setText("Capture");
-        payload[1] = 0; // set ring off
+        ui->statusLabel->clear();
     } else {
-        payload[1] = 1; // set ring off
+        payload[1] = 1;
         analogCapture = true;
         ui->analogButton->setText("Stop");
     }    
 
     serPort->write(payload);
     serPort->flush();
-    qDebug() << "Sent command:" << Qt::hex <<
-        (uint8_t)(payload[0]) << "|" <<
-        (uint8_t)(payload[1]) << "|" <<
-        (uint8_t)(payload[2]) << "|" <<
-        (uint8_t)(payload[3]);
+}
+
+void MainDialog::slotReadSerial() {
+    QMutexLocker locker(serReadMux);
+
+    serData->clear();
+    serData->append(serPort->readAll());
+
+    switch (serData->at(0)) {
+    case 0x02:
+        uint16_t adcVal = (uint8_t)(serData->at(1)) << 8 | (uint8_t)(serData->at(2));
+
+        if(ui->adcBar->maximum() < adcVal) {
+            ui->adcBar->setMaximum(adcVal);
+        }
+        ui->adcBar->setValue(adcVal);
+        ui->statusLabel->setText(QString::number(adcVal));
+        break;
+    }
+}
+
+void MainDialog::slotEnableUI() {
+    ui->analogValueBox->setEnabled(true);
+    ui->potValueBox->setEnabled(true);
+    ui->programmBox->setEnabled(true);
+}
+
+void MainDialog::slotDisableUI() {
+    ui->analogValueBox->setEnabled(false);
+    ui->potValueBox->setEnabled(false);
+    ui->programmBox->setEnabled(false);
 }

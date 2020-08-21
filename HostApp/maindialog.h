@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QtSerialPort/QSerialPort>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainDialog; }
@@ -23,10 +24,16 @@ public slots:
     void slotSetPotValue();
     void slotClearPotValue();
     void slotCaptureAnalog();
+    void slotReadSerial();
+    void slotEnableUI();
+    void slotDisableUI();
 
 private:
     Ui::MainDialog *ui;
     QSerialPort *serPort;
     bool analogCapture;
+    QByteArray *serData;
+    QMutex *serReadMux;
+
 };
 #endif // MAINDIALOG_H
