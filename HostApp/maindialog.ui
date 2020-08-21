@@ -25,7 +25,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>100</height>
+       <height>115</height>
       </size>
      </property>
      <property name="title">
@@ -126,7 +126,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>65</height>
+       <height>80</height>
       </size>
      </property>
      <property name="title">
@@ -200,16 +200,19 @@
       <string>Analog value</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <!-- <item>
-       <widget class="QLCDNumber" name="analogLabel">
-        <property name="digitCount">
-         <number>4</number>
+      <item>
+       <widget class="QProgressBar" name="adcBar">
+        <property name="maximum">
+         <number>0</number>
         </property>
-        <property name="segmentStyle">
-         <enum>QLCDNumber::Flat</enum>
+        <property name="value">
+         <number>-1</number>
         </property>
        </widget>
-      </item> -->
+      </item>
+      <item>
+       <widget class="QLCDNumber" name="adcVal"/>
+      </item>
       <item>
        <widget class="QPushButton" name="analogButton">
         <property name="sizePolicy">
@@ -412,8 +415,42 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>MainDialog</sender>
+   <signal>deviceConnected()</signal>
+   <receiver>MainDialog</receiver>
+   <slot>slotEnableUI()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>539</x>
+     <y>439</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MainDialog</sender>
+   <signal>deviceDisconnected()</signal>
+   <receiver>MainDialog</receiver>
+   <slot>slotDisableUI()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>539</x>
+     <y>439</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
+  <signal>deviceConnected()</signal>
+  <signal>deviceDisconnected()</signal>
   <slot>slotConnectSerial()</slot>
   <slot>slotDisconnectSerial()</slot>
   <slot>slotPortChanged(QString)</slot>

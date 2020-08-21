@@ -17,6 +17,10 @@ public:
     MainDialog(QWidget *parent = nullptr);
     ~MainDialog();
 
+signals:
+    deviceConnected();
+    deviceDisconnected();
+
 public slots:
     void slotPortChanged(QString);
     void slotConnectSerial();

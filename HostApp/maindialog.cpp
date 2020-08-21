@@ -54,6 +54,7 @@ void MainDialog::slotConnectSerial() {
         ui->statusLabel->setText(QString("Connected to %1 at %2 baudrate").arg(portName).arg(bSpeed));
         ui->disconnectPushButton->setEnabled(true);
         ui->connectPushButton->setEnabled(false);
+        emit deviceConnected();
     } else {
         ui->statusLabel->setText("Failed to connect");
         ui->disconnectPushButton->setEnabled(false);
@@ -67,6 +68,7 @@ void MainDialog::slotDisconnectSerial() {
         ui->disconnectPushButton->setEnabled(false);
         ui->connectPushButton->setEnabled(true);
         ui->statusLabel->setText("Disconnected");
+        emit deviceDisconnected();
     }
 }
 
@@ -153,7 +155,9 @@ void MainDialog::slotReadSerial() {
             ui->adcBar->setMaximum(adcVal);
         }
         ui->adcBar->setValue(adcVal);
-        ui->statusLabel->setText(QString::number(adcVal));
+        QString qs = QString::number(adcVal);
+        ui->adcVal->display(qs);
+        ui->statusLabel->setText(qs);
         break;
     }
 }
