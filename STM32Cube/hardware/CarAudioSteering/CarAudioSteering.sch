@@ -409,10 +409,8 @@ Wire Wire Line
 	6700 4300 6550 4300
 Wire Wire Line
 	7000 4300 7100 4300
-Wire Wire Line
-	2300 4900 2300 5050
 Text GLabel 6750 4000 2    50   Input ~ 0
-REM_TIP
+POT_W
 Wire Wire Line
 	6750 4000 6550 4000
 Wire Wire Line
@@ -540,17 +538,6 @@ REM_TIP
 Text GLabel 8900 1500 2    50   Input ~ 0
 REM_RING
 $Comp
-L power:GND #PWR0120
-U 1 1 5F441D98
-P 8900 1650
-F 0 "#PWR0120" H 8900 1400 50  0001 C CNN
-F 1 "GND" H 8905 1477 50  0000 C CNN
-F 2 "" H 8900 1650 50  0001 C CNN
-F 3 "" H 8900 1650 50  0001 C CNN
-	1    8900 1650
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR0121
 U 1 1 5F4486D3
 P 10050 1750
@@ -589,7 +576,6 @@ Wire Wire Line
 	10200 1200 10200 1350
 Wire Wire Line
 	2300 3400 2300 3100
-NoConn ~ 2800 4100
 NoConn ~ 2800 4000
 NoConn ~ 2800 3600
 NoConn ~ 2800 3700
@@ -747,8 +733,6 @@ Wire Notes Line
 Wire Notes Line
 	5250 650  5250 2350
 Wire Notes Line
-	5250 2350 10850 2350
-Wire Notes Line
 	10850 2350 10850 650 
 Wire Notes Line
 	10850 650  5250 650 
@@ -836,10 +820,6 @@ Wire Wire Line
 Wire Wire Line
 	10050 1750 10050 1600
 Wire Wire Line
-	8850 1600 8900 1600
-Wire Wire Line
-	8900 1600 8900 1650
-Wire Wire Line
 	8850 1500 8900 1500
 Wire Wire Line
 	8850 1400 8900 1400
@@ -851,13 +831,6 @@ Wire Wire Line
 	7750 1300 7750 1200
 Wire Wire Line
 	7750 1200 7800 1200
-Wire Wire Line
-	6550 3900 7350 3900
-Wire Wire Line
-	7350 3900 7350 4800
-Wire Wire Line
-	7350 4800 7100 4800
-Connection ~ 7100 4800
 Wire Wire Line
 	6050 4600 6050 4800
 Connection ~ 6050 4800
@@ -956,4 +929,90 @@ Wire Wire Line
 	9900 1600 10050 1600
 Wire Wire Line
 	10050 1500 9900 1500
+Wire Notes Line
+	5250 2350 10850 2350
+Text GLabel 5850 1450 0    50   Input ~ 0
+TIP_SW
+$Comp
+L power:GND #PWR01
+U 1 1 5F8D9C6F
+P 6200 1800
+F 0 "#PWR01" H 6200 1550 50  0001 C CNN
+F 1 "GND" H 6205 1627 50  0000 C CNN
+F 2 "" H 6200 1800 50  0001 C CNN
+F 3 "" H 6200 1800 50  0001 C CNN
+	1    6200 1800
+	1    0    0    -1  
+$EndComp
+Text GLabel 6300 1150 2    50   Input ~ 0
+POT_W
+Wire Wire Line
+	5850 1450 5900 1450
+Wire Wire Line
+	6200 1250 6200 1150
+$Comp
+L Transistor_FET:2N7002 Q2
+U 1 1 5F8D9C7A
+P 6100 1450
+F 0 "Q2" H 6305 1496 50  0000 L CNN
+F 1 "AO3400A" H 6305 1405 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 6300 1375 50  0001 L CIN
+F 3 "" H 6100 1450 50  0001 L CNN
+	1    6100 1450
+	1    0    0    -1  
+$EndComp
+Text GLabel 8900 1600 2    50   Input ~ 0
+GND
+Wire Wire Line
+	8900 1600 8850 1600
+Text GLabel 6750 3900 2    50   Input ~ 0
+REM_TIP
+Wire Wire Line
+	6550 3900 6750 3900
+Text GLabel 7850 1700 2    50   Input ~ 0
+GND
+Wire Wire Line
+	7850 1700 7750 1700
+Connection ~ 7750 1700
+Text GLabel 6300 1750 2    50   Input ~ 0
+GND
+Wire Wire Line
+	6300 1150 6200 1150
+Text GLabel 3050 4100 2    50   Input ~ 0
+TIP_SW
+Wire Wire Line
+	2800 4100 3050 4100
+Wire Wire Line
+	2300 4900 2300 5050
+Text Label 2300 5000 0    50   ~ 0
+GND
+Text Label 4900 4800 0    50   ~ 0
+GND
+Text Label 2250 7050 0    50   ~ 0
+GND
+Text Label 3350 1350 0    50   ~ 0
+GND
+Text Label 2050 1450 0    50   ~ 0
+GND
+Text Label 7750 1750 2    50   ~ 0
+GND
+Text Label 9950 1600 0    50   ~ 0
+GND
+Text Label 7000 5700 0    50   ~ 0
+GND
+Text Label 1300 5750 2    50   ~ 0
+GND
+Wire Wire Line
+	6200 1650 6200 1750
+Wire Wire Line
+	6300 1750 6200 1750
+Connection ~ 6200 1750
+Wire Wire Line
+	6200 1750 6200 1800
+Text Label 6200 1700 0    50   ~ 0
+GND
+Text Label 8600 5550 0    50   ~ 0
+GND
+Text Label 9900 6150 0    50   ~ 0
+GND
 $EndSCHEMATC
