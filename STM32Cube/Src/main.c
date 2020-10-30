@@ -122,7 +122,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC_Init();
   MX_I2C1_Init();
+
   /* USER CODE BEGIN 2 */
+  AD5272Addr = scanI2C() << 1;
+#ifdef DEBUG
+  SEGGER_RTT_TerminalOut(2, "Failed to detect I2C devices");
+#endif
+
   HAL_ADCEx_Calibration_Start(&hadc);
 
   InitDigipot();

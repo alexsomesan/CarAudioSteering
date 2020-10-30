@@ -5,6 +5,7 @@
 #include <statemachine.h>
 #include <ad5272.h>
 #include <i2c.h>
+extern uint8_t AD5272Addr;
 
 #ifdef DEBUG
 #include <SEGGER_RTT.h>
@@ -64,7 +65,7 @@ void ButtonIdleCallback() {
     SEGGER_RTT_printf(0, "Button UP\r\n");
 #endif
     HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
-    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[ButtonIdle].output & ~OUTPUT_ALT_FLAG);
+    AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, buttons[ButtonIdle].output & ~OUTPUT_ALT_FLAG);
 }
 
 void ButtonCallback(uint8_t btn) {
@@ -74,7 +75,7 @@ void ButtonCallback(uint8_t btn) {
     if (buttons[btn].output & OUTPUT_ALT_FLAG) {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
-    AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, buttons[btn].output & ~OUTPUT_ALT_FLAG);
+    AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, buttons[btn].output & ~OUTPUT_ALT_FLAG);
 }
 
 uint32_t currentState = ButtonIdle;

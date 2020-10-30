@@ -117,7 +117,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 uint8_t scanI2C() {
     uint8_t i2cAdd;
     for (i2cAdd = 0; i2cAdd < 0x80; ++i2cAdd) {
-      HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, i2cAdd<<1, 1, 0x3000);
+      HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, i2cAdd << 1, 3, 0x3000);
       if (ok == HAL_OK) {
         return i2cAdd;
       }
