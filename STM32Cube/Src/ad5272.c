@@ -108,14 +108,18 @@ int8_t AD5272_control_write_verified(I2C_HandleTypeDef *bus, uint8_t address, ui
     // now request the read data from the control register
     if (HAL_I2C_Master_Receive(bus, address, data, 2, 0x1000) != HAL_OK)
     {
-        // SEGGER_RTT_`printf(0, "AD5272 failed to read\n");
+#ifdef DEBUG
+        SEGGER_RTT_printf(2, "AD5272 failed to read\n");
+#endif
         error_count += 2;
     }
 
     if (data[1] != control)
     {
-        // SEGGER_RTT_printf(0, "AD5272 control got %x\n", data[1]);
-        // SEGGER_RTT_printf(0, "AD5272 control want %x\n", control);
+#ifdef DEBUG
+        SEGGER_RTT_printf(2, "AD5272 control got %x\n", data[1]);
+        SEGGER_RTT_printf(2, "AD5272 control want %x\n", control);
+#endif        
         return -1 * error_count;
     }
 

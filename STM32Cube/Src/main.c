@@ -30,11 +30,14 @@
 #include <config.h>
 #include "memory.h"
 #include "math.h"
-#include "SEGGER_RTT.h"
 #include "ad5272.h"
 #include "statemachine.h"
 #include "commands.h"
 #include "flashstorage.h"
+
+#ifdef DEBUG
+#include "SEGGER_RTT.h"
+#endif
 
 /* USER CODE END Includes */
 
@@ -63,11 +66,9 @@ static uint16_t *readouts;
 static uint8_t* rxBuff;
 static uint8_t* txBuff;
 
-
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
 volatile uint32_t stateFlags = 0;
-
 
 /* USER CODE END PV */
 
@@ -118,16 +119,18 @@ int main(void)
   MX_ADC_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-    HAL_ADCEx_Calibration_Start(&hadc);
+  HAL_ADCEx_Calibration_Start(&hadc);
 
-    InitDigipot();
-    InitCommands();
+  InitDigipot();
+  #ifdef DEBUG
+  InitCommandNames();
+  #endif
 
-    HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
-    HAL_UART_Receive_DMA(&huart1, rxBuff, RX_BUF_LEN);
+  HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
+  HAL_UART_Receive_DMA(&huart1, rxBuff, RX_BUF_LEN);
 
-    uint32_t avg = 4096;
-    char avgstr[10];
+  uint32_t avg = 4096;
+  char avgstr[10];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -157,7 +160,9 @@ int main(void)
                 }
                 break;
               default:
-                // SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
+#ifdef DEBUG
+                SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
+#endif
                 break;
               }
               intFlags ^= FL_URX_READY;
@@ -177,8 +182,9 @@ int main(void)
         }
 
         sprintf(avgstr, "%ld\r\n", avg);
-        // SEGGER_RTT_TerminalOut(1, avgstr);
-
+#ifdef DEBUG
+          SEGGER_RTT_TerminalOut(1, avgstr);
+#endif
         ProcessInput(avg);
 
     /* USER CODE END WHILE */
@@ -251,7 +257,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* myadc) {
         }
     }
     char maxstr[10];
-    // SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+#ifdef DEBUG    
+    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+#endif
     if (maxVar > MAX_VARIATION) 
         return;
 #endif
@@ -272,7 +280,9 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
         }
     }
     char maxstr[10];
-    // SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+#ifdef    
+    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+#endif
     if (maxVar > MAX_VARIATION) 
         return;
 #endif

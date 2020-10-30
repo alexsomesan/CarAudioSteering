@@ -5,11 +5,12 @@
 extern "C" {
 #endif
 
+#include "config.h"
 #include "stm32f0xx_hal.h"
 #include "commands.h"
 
-ButtonCommand* loadButtons();
-void storeButtons(ButtonCommand* b);
+void loadButtons();
+void storeButtons();
 
 #ifdef __cplusplus
 extern "C" {

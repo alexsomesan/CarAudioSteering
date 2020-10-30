@@ -11,32 +11,27 @@ extern "C"
 #define OUTPUT_ALT_FLAG 0x8000
 
 enum _buttons {
-    Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,
+    ButtonMode, ButtonNextTrack, ButtonPrevTrack, ButtonVolUp, ButtonVolDown, ButtonVoiceCmd, ButtonPhoneUp, ButtonPhoneDown,
     ButtonIdle, ButtonCount // these two must always come last, in this exact order
 };
 
 typedef struct _btncmd {
     uint16_t input;
     uint16_t output;
-    void (*callback)(void);
-    // char name[10];
+#ifdef DEBUG    
+    char name[10];
+#endif
 } ButtonCommand;
 
 extern ButtonCommand buttons[ButtonCount];
 
-void InitCommands();
 void ProcessInput(uint32_t inVal);
-
 void ButtonIdleCallback();
+void ButtonCallback(uint8_t btn);
 
-void Button1Callback();
-void Button2Callback();
-void Button3Callback();
-void Button4Callback();
-void Button5Callback();
-void Button6Callback();
-void Button7Callback();
-void Button8Callback();
+#ifdef DEBUG
+void InitCommands();
+#endif
 
 #ifdef __cplusplus
 }
