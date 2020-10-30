@@ -18,8 +18,8 @@ public:
     ~MainDialog();
 
 signals:
-    deviceConnected();
-    deviceDisconnected();
+    void deviceConnected();
+    void deviceDisconnected();
 
 public slots:
     void slotPortChanged(QString);
