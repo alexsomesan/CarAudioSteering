@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "files.associations": {
+        "*.cps": "javascript",
         "array": "cpp",
         "string_view": "cpp",
         "qcheckbox": "cpp",
@@ -8,6 +9,8 @@
         "deque": "cpp",
         "list": "cpp",
         "string": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "ostream": "cpp",
+        "istream": "cpp"
     }
 }

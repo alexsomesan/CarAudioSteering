@@ -24,7 +24,6 @@ MainDialog::MainDialog(QWidget *parent)
     }
     ui->speedComboBox->setCurrentIndex(bauds.indexOf(115200));
     analogCapture = false;
-    connect(serPort, SIGNAL(readyRead()),this, SLOT(slotReadSerial()) );
 }
 
 MainDialog::~MainDialog()
@@ -45,17 +44,48 @@ void MainDialog::slotPortChanged(QString port) {
 void MainDialog::slotConnectSerial() {
     qint32 bSpeed = ui->speedComboBox->currentText().toInt();
     QString portName = serPort->portName();
+    bool ack;
 
     qDebug() << "Connecting to" << portName << "at" << bSpeed << "baudrate...";
 
     serPort->setBaudRate(bSpeed);
 
-    if (serPort->open(QIODevice::ReadWrite)) {
+    ack = serPort->open(QIODevice::ReadWrite);
+
+    if (ack) {
+        QByteArray payload((int)4, (char)0);
+        payload[0] = 0xFF;
+        payload[1] = 0xFF;
+        payload[2] = 0xFF;
+        payload[3] = 0xFF;
+
+        serPort->write(payload);
+        serPort->flush();
+        qDebug() << "Asking for handshake...";
+
+        ack = serPort->waitForReadyRead(2000);
+        if (ack) {
+            QByteArray handshake(5, Qt::Uninitialized);
+            handshake.clear();
+            handshake.append(serPort->readAll());
+            qDebug() << QString(handshake);
+            ack = QString(handshake).contains("ello");
+            if (ack) {
+                qDebug() << "Successful handshake";
+            }
+        } else {
+            qDebug() << "Timeout waiting for handshake";
+            serPort->close();
+        }
+    }
+    if (ack) {
         ui->statusLabel->setText(QString("Connected to %1 at %2 baudrate").arg(portName).arg(bSpeed));
         ui->disconnectPushButton->setEnabled(true);
         ui->connectPushButton->setEnabled(false);
         emit deviceConnected();
+        connect(serPort, SIGNAL(readyRead()),this, SLOT(slotReadSerial()));
     } else {
+        serPort->close();
         ui->statusLabel->setText("Failed to connect");
         ui->disconnectPushButton->setEnabled(false);
         ui->connectPushButton->setEnabled(true);
@@ -69,6 +99,7 @@ void MainDialog::slotDisconnectSerial() {
         ui->connectPushButton->setEnabled(true);
         ui->statusLabel->setText("Disconnected");
         emit deviceDisconnected();
+        disconnect(serPort, SIGNAL(readyRead()),this, SLOT(slotReadSerial()));
     }
 }
 
