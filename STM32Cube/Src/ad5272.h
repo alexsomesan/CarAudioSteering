@@ -8,8 +8,6 @@ extern "C"
 
 #include "stm32f0xx_hal.h"
 
-#define AD5272_ADDRESS (0x2F << 1)
-
 /**
  * I2C ADDRESS CONSTANTS
  * I2C base addresses of AD5274 dependent on ADDR pin connection

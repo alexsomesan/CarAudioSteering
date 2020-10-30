@@ -55,7 +55,9 @@
 #define FL_URX_READY  0x00000002
 #define FL_UTX_READY  0x00000004
 
-#define FL_FWD_ADC    0x00000004
+#define FL_FWD_ADC    0x00000001
+#define FL_HANDSHK    0x00000002
+
 
 /* USER CODE END PM */
 
@@ -80,6 +82,8 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t scanI2C();
+extern uint8_t AD5272Addr;
 
 /* USER CODE END 0 */
 
@@ -142,22 +146,31 @@ int main(void)
             if (intFlags & FL_URX_READY) {
               switch (rxBuff[0])
               {
-              case 0x01:
+              case 0x01: // Manual pot output
                 if (1 == rxBuff[1]) {
                   HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
                 } else {
                   HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
                 }
                 uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
-                AD5272_command_write(&hi2c1, AD5272_ADDRESS, AD5272_RDAC_WRITE, pv);
+                AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, pv);
+                if(0x3FF == pv) {
+                  HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
+                } else {
+                  HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_SET);
+                }
                 break;
-              case 0x02:
+              case 0x02: // Monitor ADC
                 if (rxBuff[1] == 0) {
                   stateFlags &= ~FL_FWD_ADC;
                 } else {
                   stateFlags |= FL_FWD_ADC;
                   intFlags |= FL_UTX_READY;
                 }
+                break;
+              case 0xFF:
+                stateFlags |= FL_HANDSHK;
+                intFlags |= FL_UTX_READY;
                 break;
               default:
 #ifdef DEBUG
@@ -180,6 +193,20 @@ int main(void)
           intFlags ^= FL_UTX_READY;
           HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN);
         }
+
+        if ((intFlags & FL_UTX_READY ) && (stateFlags & FL_HANDSHK)) {
+          stateFlags &= ~FL_HANDSHK;
+          SEGGER_RTT_TerminalOut(2, "Got handshake request\r\n");
+          txBuff[0] = 'e';
+          txBuff[1] = 'l';
+          txBuff[2] = 'l';
+          txBuff[3] = 'o';
+          intFlags ^= FL_UTX_READY;
+          HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN); // Acknowledge connection
+          SEGGER_RTT_TerminalOut(2, "Sent handshake response\r\n");
+        }
+
+        
 
         sprintf(avgstr, "%ld\r\n", avg);
 #ifdef DEBUG

@@ -114,7 +114,16 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+uint8_t scanI2C() {
+    uint8_t i2cAdd;
+    for (i2cAdd = 0; i2cAdd < 0x80; ++i2cAdd) {
+      HAL_StatusTypeDef ok = HAL_I2C_IsDeviceReady(&hi2c1, i2cAdd<<1, 1, 0x3000);
+      if (ok == HAL_OK) {
+        return i2cAdd;
+      }
+    }
+    return 0x00;
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
