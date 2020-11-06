@@ -16,6 +16,7 @@ class MainDialog : public QDialog
 public:
     MainDialog(QWidget *parent = nullptr);
     ~MainDialog();
+    void setPortOverride(QString);
 
 signals:
     void deviceConnected();
@@ -38,6 +39,7 @@ private:
     bool analogCapture;
     QByteArray *serData;
     QMutex *serReadMux;
+    QString *serportOverride;
 
 };
 #endif // MAINDIALOG_H

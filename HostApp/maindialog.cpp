@@ -10,6 +10,7 @@ MainDialog::MainDialog(QWidget *parent)
     , serPort(new QSerialPort)
     , serData(new QByteArray)
     , serReadMux(new QMutex)
+    , serportOverride(new QString)
 {
     ui->setupUi(this);
     slotDisableUI();
@@ -203,4 +204,10 @@ void MainDialog::slotDisableUI() {
     ui->analogValueBox->setEnabled(false);
     ui->potValueBox->setEnabled(false);
     ui->programmBox->setEnabled(false);
+}
+
+void MainDialog::setPortOverride(QString p) {
+    *serportOverride = p;
+    ui->portComboBox->addItem(p);
+    ui->portComboBox->setCurrentText(p);
 }
