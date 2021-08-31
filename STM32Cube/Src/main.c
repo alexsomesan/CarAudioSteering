@@ -33,9 +33,13 @@
 #include "ad5272.h"
 #include "statemachine.h"
 #include "commands.h"
+
+#ifdef FEAT_FLASH_STORAGE
 #include "flashstorage.h"
+#endif
 
 #ifdef DEBUG
+#include "stdio.h"
 #include "SEGGER_RTT.h"
 #endif
 
@@ -51,13 +55,12 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define FL_AVG_READY  0x00000001
-#define FL_URX_READY  0x00000002
-#define FL_UTX_READY  0x00000004
+#define FL_AVG_READY 0x00000001
+#define FL_URX_READY 0x00000002
+#define FL_UTX_READY 0x00000004
 
-#define FL_FWD_ADC    0x00000001
-#define FL_HANDSHK    0x00000002
-
+#define FL_FWD_ADC 0x00000001
+#define FL_HANDSHK 0x00000002
 
 /* USER CODE END PM */
 
@@ -65,8 +68,8 @@
 
 /* USER CODE BEGIN PV */
 static uint16_t *readouts;
-static uint8_t* rxBuff;
-static uint8_t* txBuff;
+static uint8_t *rxBuff;
+static uint8_t *txBuff;
 
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
@@ -94,9 +97,9 @@ extern uint8_t AD5272Addr;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-    readouts = malloc(sizeof(uint16_t)*BUT_BUF_LEN);
-    rxBuff = malloc(sizeof(uint8_t)*RX_BUF_LEN);
-    txBuff = malloc(sizeof(uint8_t)*TX_BUF_LEN);
+  readouts = malloc(sizeof(uint16_t) * BUT_BUF_LEN);
+  rxBuff = malloc(sizeof(uint8_t) * RX_BUF_LEN);
+  txBuff = malloc(sizeof(uint8_t) * TX_BUF_LEN);
 
   /* USER CODE END 1 */
 
@@ -124,108 +127,122 @@ int main(void)
   MX_I2C1_Init();
 
   /* USER CODE BEGIN 2 */
-  AD5272Addr = scanI2C() << 1;
-#ifdef DEBUG
-  SEGGER_RTT_TerminalOut(2, "Failed to detect I2C devices");
-#endif
-
+  // AD5272Addr = scanI2C() << 1;
   HAL_ADCEx_Calibration_Start(&hadc);
 
-  InitDigipot();
-  #ifdef DEBUG
+  // InitDigipot();
+#ifdef DEBUG
   InitCommandNames();
-  #endif
+  char avgstr[40];
+  sprintf(avgstr, "I2C: %0X\r\n", AD5272Addr);
+  SEGGER_RTT_TerminalOut(2, avgstr);
+#endif
 
-  HAL_ADC_Start_DMA(&hadc, (uint32_t*)readouts, BUT_BUF_LEN);
+  HAL_ADC_Start_DMA(&hadc, (uint32_t *)readouts, BUT_BUF_LEN);
   HAL_UART_Receive_DMA(&huart1, rxBuff, RX_BUF_LEN);
 
   uint32_t avg = 4096;
-  char avgstr[10];
   /* USER CODE END 2 */
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-    while (1)
+  /* USER CODE BEGIN WHILE */ 
+  while (1)
+  {
+    // wait for DMA interrupt
+    while (0 == (intFlags & FL_AVG_READY))
     {
-        // wait for DMA interrupt
-        while (0 == (intFlags & FL_AVG_READY)) {
-            if (intFlags & FL_URX_READY) {
-              switch (rxBuff[0])
-              {
-              case 0x01: // Manual pot output
-                if (1 == rxBuff[1]) {
-                  HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
-                } else {
-                  HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
-                }
-                uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
-                AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, pv);
-                if(0x3FF == pv) {
-                  HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
-                } else {
-                  HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_SET);
-                }
-                break;
-              case 0x02: // Monitor ADC
-                if (rxBuff[1] == 0) {
-                  stateFlags &= ~FL_FWD_ADC;
-                } else {
-                  stateFlags |= FL_FWD_ADC;
-                  intFlags |= FL_UTX_READY;
-                }
-                break;
-              case 0xFF:
-                stateFlags |= FL_HANDSHK;
-                intFlags |= FL_UTX_READY;
-                break;
-              default:
+      if (intFlags & FL_URX_READY)
+      {
 #ifdef DEBUG
-                SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
+        sprintf(avgstr, "UART: %0X%0X%0X%0 X\r\n", rxBuff[0], rxBuff[1], rxBuff[2], rxBuff[3]);
+        SEGGER_RTT_TerminalOut(2, avgstr);
 #endif
-                break;
-              }
-              intFlags ^= FL_URX_READY;
-            }
-        }
-
-        avg = average;
-        intFlags ^= FL_AVG_READY;
-
-        if ((intFlags & FL_UTX_READY ) && (stateFlags & FL_FWD_ADC)) {
-          txBuff[0] = 0x02;
-          txBuff[1] = (avg >> 8) & 0xFF;
-          txBuff[2] = avg & 0xFF;
-          txBuff[3] = 0;
-          intFlags ^= FL_UTX_READY;
-          HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN);
-        }
-
-        if ((intFlags & FL_UTX_READY ) && (stateFlags & FL_HANDSHK)) {
-          stateFlags &= ~FL_HANDSHK;
+        switch (rxBuff[0])
+        {
+        case 0x01: // Manual pot output
+          if (1 == rxBuff[1])
+          {
+            HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
+          }
+          else
+          {
+            HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
+          }
+          uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
+          AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, pv);
+          if (0x3FF == pv)
+          {
+            HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
+          }
+          else
+          {
+            HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_SET);
+          }
+          break;
+        case 0x02: // Monitor ADC
+          if (rxBuff[1] == 0)
+          {
+            stateFlags &= ~FL_FWD_ADC;
+          }
+          else
+          {
+            stateFlags |= FL_FWD_ADC;
+            intFlags |= FL_UTX_READY;
+          }
+          break;
+        case 0xFA:
+          if (rxBuff[1] == 0xFB && rxBuff[2] == 0xFC && rxBuff[3] == 0xFD){
+            intFlags |= FL_UTX_READY;
+#ifdef DEBUG
           SEGGER_RTT_TerminalOut(2, "Got handshake request\r\n");
+#endif
           txBuff[0] = 'e';
           txBuff[1] = 'l';
           txBuff[2] = 'l';
           txBuff[3] = 'o';
           intFlags ^= FL_UTX_READY;
           HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN); // Acknowledge connection
-          SEGGER_RTT_TerminalOut(2, "Sent handshake response\r\n");
-        }
-
-        
-
-        sprintf(avgstr, "%ld\r\n", avg);
+          stateFlags |= FL_HANDSHK;
+          intFlags |= FL_UTX_READY;
 #ifdef DEBUG
-          SEGGER_RTT_TerminalOut(1, avgstr);
+          SEGGER_RTT_TerminalOut(2, "Sent handshake response\r\n");
 #endif
-        ProcessInput(avg);
+          }
+          break;
+        default:
+#ifdef DEBUG
+          SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");
+#endif
+          break;
+        }
+        intFlags ^= FL_URX_READY;
+      }
+    }
+
+    avg = average;
+    intFlags ^= FL_AVG_READY;
+
+    if ((intFlags & FL_UTX_READY) && (stateFlags & FL_FWD_ADC) && (stateFlags & FL_HANDSHK))
+    {
+      txBuff[0] = 0x02;
+      txBuff[1] = (avg >> 8) & 0xFF;
+      txBuff[2] = avg & 0xFF;
+      txBuff[3] = 0;
+      intFlags ^= FL_UTX_READY;
+      HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN);
+    }
+
+#ifdef DEBUG
+    sprintf(avgstr, "%ld\r\n", avg);
+    SEGGER_RTT_TerminalOut(1, avgstr);
+#endif
+    ProcessInput(avg);
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    }
-    free(readouts);
+  }
+  free(readouts);
   /* USER CODE END 3 */
 }
 
@@ -242,7 +259,7 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14 | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -256,8 +273,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -266,7 +282,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_I2C1;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_SYSCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
@@ -276,57 +292,75 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* myadc) {
-    for (int i = BUT_BUF_LEN / 2 ; i < BUT_BUF_LEN; i++) {
-        average += readouts[i];
-    }
-    average /= BUT_BUF_LEN / 2;
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *myadc)
+{
+  for (int i = BUT_BUF_LEN / 2; i < BUT_BUF_LEN; i++)
+  {
+    average += readouts[i];
+  }
+  average /= BUT_BUF_LEN / 2;
 #if VARIO_FILTER
-    uint32_t maxVar = 0;
-    for (int i = BUT_BUF_LEN / 2 ; i < BUT_BUF_LEN; i++) {
-        uint32_t diff = abs((uint32_t)readouts[i] - average);
-        if (diff > maxVar) {
-            maxVar = diff;
-        }
+  uint32_t maxVar = 0;
+  for (int i = BUT_BUF_LEN / 2; i < BUT_BUF_LEN; i++)
+  {
+    uint32_t diff = abs((uint32_t)readouts[i] - average);
+    if (diff > maxVar)
+    {
+      maxVar = diff;
     }
-    char maxstr[10];
-#ifdef DEBUG    
-    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+  }
+  char maxstr[10];
+#ifdef DEBUG
+  SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
 #endif
+  if (maxVar > MAX_VARIATION)
     if (maxVar > MAX_VARIATION) 
-        return;
+  if (maxVar > MAX_VARIATION)
+    if (maxVar > MAX_VARIATION) 
+  if (maxVar > MAX_VARIATION)
+    return;
 #endif
-    intFlags |= FL_AVG_READY;
+  intFlags |= FL_AVG_READY;
 }
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* myadc) {
-    for (int i = 0; i < BUT_BUF_LEN / 2; i++) {
-        average += readouts[i];
-    }
-    average /= BUT_BUF_LEN / 2;
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *myadc)
+{
+  for (int i = 0; i < BUT_BUF_LEN / 2; i++)
+  {
+    average += readouts[i];
+  }
+  average /= BUT_BUF_LEN / 2;
 #if VARIO_FILTER
-    uint32_t maxVar = 0;
-    for (int i = 0; i < BUT_BUF_LEN / 2; i++) {
-        uint32_t diff = abs((uint32_t)readouts[i] - average);
-        if (diff > maxVar) {
-            maxVar = diff;
-        }
+  uint32_t maxVar = 0;
+  for (int i = 0; i < BUT_BUF_LEN / 2; i++)
+  {
+    uint32_t diff = abs((uint32_t)readouts[i] - average);
+    if (diff > maxVar)
+    {
+      maxVar = diff;
     }
-    char maxstr[10];
-#ifdef    
-    SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
+  }
+  char maxstr[10];
+#ifdef
+  SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
 #endif
+  if (maxVar > MAX_VARIATION)
     if (maxVar > MAX_VARIATION) 
-        return;
+  if (maxVar > MAX_VARIATION)
+    if (maxVar > MAX_VARIATION) 
+  if (maxVar > MAX_VARIATION)
+    return;
 #endif
-    intFlags |= FL_AVG_READY;
+  intFlags |= FL_AVG_READY;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
   intFlags |= FL_URX_READY;
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
   intFlags |= FL_UTX_READY;
 }
 
@@ -339,12 +373,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
+  /* User can add his own implementation to report the HAL error return state */
 
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
@@ -355,7 +389,7 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-    /* User can add his own implementation to report the file name and line number,
+  /* User can add his own implementation to report the file name and line number,
        tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
