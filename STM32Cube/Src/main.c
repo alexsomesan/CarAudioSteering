@@ -145,6 +145,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint16_t pv;
   while (1)
   {
     // wait for DMA interrupt
@@ -159,6 +160,7 @@ int main(void)
         switch (rxBuff[0])
         {
         case 0x01: // Manual pot output
+          pv = (uint16_t)(rxBuff[2]) << 8 | (uint16_t)(rxBuff[3]);
           if (1 == rxBuff[1])
           {
             HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
@@ -167,14 +169,13 @@ int main(void)
           {
             HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
           }
-          uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
-          AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, pv);
           if (0x3FF == pv)
           {
             HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
           }
           else
           {
+            AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, pv);
             HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_SET);
           }
           break;
