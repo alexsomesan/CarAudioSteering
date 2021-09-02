@@ -85,8 +85,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t scanI2C();
-extern uint8_t AD5272Addr;
 
 /* USER CODE END 0 */
 
@@ -125,12 +123,17 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC_Init();
   MX_I2C1_Init();
-
   /* USER CODE BEGIN 2 */
-  // AD5272Addr = scanI2C() << 1;
+  HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
+
   HAL_ADCEx_Calibration_Start(&hadc);
 
-  // InitDigipot();
+  ResetAD5272();
+  AD5272Addr = scanI2C();
+
+  InitAD5272();
+
 #ifdef DEBUG
   InitCommandNames();
   char avgstr[40];
@@ -145,7 +148,7 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */ 
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
     // wait for DMA interrupt
@@ -169,7 +172,7 @@ int main(void)
             HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
           }
           uint16_t pv = ((uint16_t)rxBuff[2]) << 8 | (uint16_t)rxBuff[3];
-          AD5272_command_write(&hi2c1, AD5272Addr, AD5272_RDAC_WRITE, pv);
+          AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, pv);
           if (0x3FF == pv)
           {
             HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
@@ -191,22 +194,27 @@ int main(void)
           }
           break;
         case 0xFA:
-          if (rxBuff[1] == 0xFB && rxBuff[2] == 0xFC && rxBuff[3] == 0xFD){
-            intFlags |= FL_UTX_READY;
+          if (rxBuff[1] == 0xFB && rxBuff[2] == 0xFC && rxBuff[3] == 0xFD)
+          {
 #ifdef DEBUG
-          SEGGER_RTT_TerminalOut(2, "Got handshake request\r\n");
+            SEGGER_RTT_TerminalOut(2, "Got handshake request\r\n");
 #endif
-          txBuff[0] = 'e';
-          txBuff[1] = 'l';
-          txBuff[2] = 'l';
-          txBuff[3] = 'o';
-          intFlags ^= FL_UTX_READY;
-          HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN); // Acknowledge connection
-          stateFlags |= FL_HANDSHK;
-          intFlags |= FL_UTX_READY;
+            txBuff[0] = 'e';
+            txBuff[1] = 'l';
+            txBuff[2] = 'l';
+            txBuff[3] = 'o';
+            intFlags &= ~FL_UTX_READY;
+            HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN); // Acknowledge connection
+            stateFlags |= FL_HANDSHK;
 #ifdef DEBUG
-          SEGGER_RTT_TerminalOut(2, "Sent handshake response\r\n");
+            SEGGER_RTT_TerminalOut(2, "Sent handshake response\r\n");
 #endif
+          }
+          break;
+        case 0xFD:
+          if (rxBuff[1] == 0xFC && rxBuff[2] == 0xFB && rxBuff[3] == 0xFA)
+          {
+            stateFlags &= ~(FL_HANDSHK | FL_FWD_ADC);
           }
           break;
         default:
@@ -220,7 +228,7 @@ int main(void)
     }
 
     avg = average;
-    intFlags ^= FL_AVG_READY;
+    intFlags &= ~FL_AVG_READY;
 
     if ((intFlags & FL_UTX_READY) && (stateFlags & FL_FWD_ADC) && (stateFlags & FL_HANDSHK))
     {
@@ -228,7 +236,7 @@ int main(void)
       txBuff[1] = (avg >> 8) & 0xFF;
       txBuff[2] = avg & 0xFF;
       txBuff[3] = 0;
-      intFlags ^= FL_UTX_READY;
+      intFlags &= ~FL_UTX_READY;
       HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN);
     }
 
@@ -314,10 +322,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *myadc)
   SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
 #endif
   if (maxVar > MAX_VARIATION)
-    if (maxVar > MAX_VARIATION) 
-  if (maxVar > MAX_VARIATION)
-    if (maxVar > MAX_VARIATION) 
-  if (maxVar > MAX_VARIATION)
     return;
 #endif
   intFlags |= FL_AVG_READY;
@@ -344,10 +348,6 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *myadc)
 #ifdef
   SEGGER_RTT_TerminalOut(2, strcat(itoa(maxVar, maxstr, 10), "\r\n"));
 #endif
-  if (maxVar > MAX_VARIATION)
-    if (maxVar > MAX_VARIATION) 
-  if (maxVar > MAX_VARIATION)
-    if (maxVar > MAX_VARIATION) 
   if (maxVar > MAX_VARIATION)
     return;
 #endif

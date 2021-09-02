@@ -77,10 +77,13 @@ extern "C"
 // 50TP memory has been successfully programmed if this bit is set
 #define AD5272_50TP_WRITE_SUCCESS 0x08
 
-int8_t AD5272_command_write(I2C_HandleTypeDef *bus, uint8_t address, uint8_t command, uint16_t write_datum16);
-int8_t AD5272_control_write_verified(I2C_HandleTypeDef *bus, uint8_t address, uint8_t control);
+    int8_t AD5272_command_write(I2C_HandleTypeDef *bus, uint8_t command, uint16_t write_datum16);
+    int8_t AD5272_control_write_verified(I2C_HandleTypeDef *bus, uint8_t control);
 
-void InitDigipot();
+    extern uint8_t AD5272Addr;
+
+    void InitAD5272();
+    void ResetAD5272();
 
 #ifdef __cplusplus
 }
