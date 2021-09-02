@@ -209,23 +209,38 @@ void MainDialog::slotCaptureAnalog()
 void MainDialog::slotReadSerial()
 {
     QMutexLocker locker(serReadMux);
+    QString qs;
+    uint16_t adcVal;
 
     serData->clear();
     serData->append(serPort->readAll());
 
-    switch (serData->at(0))
+    switch ((uint8_t)(serData->at(0)))
     {
     case 0x02:
-        uint16_t adcVal = (uint8_t)(serData->at(1)) << 8 | (uint8_t)(serData->at(2));
+        adcVal = (uint8_t)(serData->at(1)) << 8 | (uint8_t)(serData->at(2));
 
         if (ui->adcBar->maximum() < adcVal)
         {
             ui->adcBar->setMaximum(adcVal);
         }
         ui->adcBar->setValue(adcVal);
-        QString qs = QString::number(adcVal);
+        qs = QString::number(adcVal);
         ui->adcVal->display(qs);
         ui->statusLabel->setText(qs);
+        break;
+    case 0xE3:
+        if (
+            0xE2 == (uint8_t)((*serData)[1]) &&
+            0xE1 == (uint8_t)((*serData)[2]) &&
+            0xE0 == (uint8_t)((*serData)[3]))
+        {
+            ui->statusLabel->setText("Save acknoledged...");
+        }
+        else
+        {
+            ui->statusLabel->setText("Save not acknoledged...");
+        }
         break;
     }
 }
@@ -249,4 +264,20 @@ void MainDialog::setPortOverride(QString p)
     *serportOverride = p;
     ui->portComboBox->addItem(p);
     ui->portComboBox->setCurrentText(p);
+}
+
+void MainDialog::slotSaveValues()
+{
+    if (serPort->isOpen())
+    {
+        QByteArray payload((int)4, Qt::Uninitialized);
+        payload[0] = 0xE0;
+        payload[1] = 0xE1;
+        payload[2] = 0xE2;
+        payload[3] = 0xE3;
+        serPort->write(payload);
+        serPort->flush();
+        qDebug() << "Asking to save values...";
+        ui->statusLabel->setText("Save requested...");
+    }
 }

@@ -32,6 +32,7 @@ public slots:
     void slotReadSerial();
     void slotEnableUI();
     void slotDisableUI();
+    void slotSaveValues();
 
 private:
     Ui::MainDialog *ui;
