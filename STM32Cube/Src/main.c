@@ -67,9 +67,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static uint16_t *readouts;
-static uint8_t *rxBuff;
-static uint8_t *txBuff;
+uint16_t readouts[BUT_BUF_LEN];
+uint8_t rxBuff[RX_BUF_LEN];
+uint8_t txBuff[TX_BUF_LEN];
 
 volatile uint32_t average = 0;
 volatile uint32_t intFlags = 0;
@@ -95,10 +95,6 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  readouts = malloc(sizeof(uint16_t) * BUT_BUF_LEN);
-  rxBuff = malloc(sizeof(uint8_t) * RX_BUF_LEN);
-  txBuff = malloc(sizeof(uint8_t) * TX_BUF_LEN);
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -193,7 +189,7 @@ int main(void)
             intFlags |= FL_UTX_READY;
           }
           break;
-        case 0xFA:
+        case 0xFA: // Host handshake
           if (rxBuff[1] == 0xFB && rxBuff[2] == 0xFC && rxBuff[3] == 0xFD)
           {
 #ifdef DEBUG
@@ -211,12 +207,26 @@ int main(void)
 #endif
           }
           break;
-        case 0xFD:
+        case 0xFD: // Host disconnect
           if (rxBuff[1] == 0xFC && rxBuff[2] == 0xFB && rxBuff[3] == 0xFA)
           {
             stateFlags &= ~(FL_HANDSHK | FL_FWD_ADC);
           }
           break;
+#ifdef FEAT_FLASH_STORAGE
+        case 0xE0: // store settings
+          if (rxBuff[1] == 0xE1 && rxBuff[2] == 0xE2 && rxBuff[3] == 0xE3)
+          {
+            storeButtons();
+            txBuff[0] = 0xE3;
+            txBuff[1] = 0xE2;
+            txBuff[2] = 0xE1;
+            txBuff[3] = 0xE0;
+            intFlags &= ~FL_UTX_READY;
+            HAL_UART_Transmit_DMA(&huart1, txBuff, TX_BUF_LEN); // Acknowledge connection
+          }
+          break;
+#endif
         default:
 #ifdef DEBUG
           SEGGER_RTT_TerminalOut(2, "Unknown UART command\r\n");

@@ -10,9 +10,6 @@
 
 // Store settings in flash
 // #define FEAT_FLASH_STORAGE
-
-#ifdef FEAT_FLASH_STORAGE
-#define FLASH_LOCATION 0x08003C00
-#endif
+// #define FEAT_FLASH_STORAGE_ERASE
 
 #endif
