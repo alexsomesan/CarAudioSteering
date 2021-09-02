@@ -15,39 +15,39 @@ uint8_t bracket = TOLERANCE;
 
 ButtonCommand buttons[ButtonCount] = {
     {// ButtonMode
-     input : 0xA0A0,
-     output : 0xB0B0
+     input : 256,
+     output : 15
     },
     {// ButtonNextTrack
-     input : 0xA1A1,
-     output : 0xB1B1
+     input : 578,
+     output : 80
     },
     {// ButtonPrevTrack
-     input : 0xA2A2,
-     output : 0xB2B2
+     input : 895,
+     output : 125
     },
     {// ButtonVolUp
-     input : 0xA3A3,
-     output : 0xB3B3
+     input : 1271,
+     output : 155
     },
     {// ButtonVolDown
-     input : 0xA4A4,
-     output : 0xB4B4
+     input : 1625,
+     output : 230
     },
     {// ButtonVoiceCmd
-     input : 0xA5A5,
-     output : 0xB5B5
+     input : 2011,
+     output : 0x03FF
     },
     {// ButtonPhoneUp
-     input : 0xA6A6,
-     output : 0xB6B6
+     input : 2329,
+     output : 0x03FF
     },
     {// ButtonPhoneDown
-     input : 0xA7A7,
-     output : 0xB7B7
+     input : 2642,
+     output : 0x03FF
     },
     {// ButtonIdle (always has to be last)
-     input : 0xA8A8,
+     input : 3666,
      output : 0xB8B8
     }};
 
