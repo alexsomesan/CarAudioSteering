@@ -48,7 +48,7 @@ ButtonCommand buttons[ButtonCount] = {
     },
     {// ButtonIdle (always has to be last)
      input : 3666,
-     output : 0xB8B8
+     output : 0x03FF
     }};
 
 void ProcessInput(uint32_t inVal)
@@ -67,8 +67,10 @@ void ButtonIdleCallback()
 #ifdef DEBUG
     SEGGER_RTT_printf(0, "Button UP\r\n");
 #endif
+    HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_RESET);
-    AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, buttons[ButtonIdle].output & ~OUTPUT_ALT_FLAG);
+    uint16_t potVal = buttons[ButtonIdle].output & 0x3FF;
+    AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, potVal);
 }
 
 void ButtonCallback(uint8_t btn)
@@ -76,11 +78,13 @@ void ButtonCallback(uint8_t btn)
 #ifdef DEBUG
     SEGGER_RTT_printf(0, "%s DOWN\r\n", buttons[btn].name);
 #endif
+    uint16_t potVal = buttons[btn].output & 0x3FF;
+    AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, potVal);
     if (buttons[btn].output & OUTPUT_ALT_FLAG)
     {
         HAL_GPIO_WritePin(RING_SW_GPIO_Port, RING_SW_Pin, GPIO_PIN_SET);
     }
-    AD5272_command_write(&hi2c1, AD5272_RDAC_WRITE, buttons[btn].output & ~OUTPUT_ALT_FLAG);
+    HAL_GPIO_WritePin(TIP_SW_GPIO_Port, TIP_SW_Pin, GPIO_PIN_SET);
 }
 
 uint32_t currentState = ButtonIdle;
